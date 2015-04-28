@@ -1,11 +1,20 @@
+#ifndef READSOUND_H
+#define READSOUND_H
+
 #include <sndfile.h> 
 #include <Eigen/Dense>
+
+#include "IO/IO.h"
 
 using namespace std; 
 
 class SoundReader
 {
     public: 
+
+        /* 
+         * Read wav file into an Eigen matrix. 
+         */
         static Eigen::MatrixXd * wavreader(const char * wavfile, int BUFFERSIZE, Eigen::MatrixXd * soundout)
         {
             //char wavfile[] = "./sound/test.wav"; 
@@ -39,3 +48,6 @@ class SoundReader
         }
 
 };
+
+
+#endif

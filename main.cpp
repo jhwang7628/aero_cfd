@@ -1,40 +1,72 @@
 #include <stdio.h> 
+#include <unistd.h>
 #include <iostream>
 
 #include <Eigen/Dense>
+
 #include <sndfile.h>
+#include "portaudio.h"
+#include "pa_util.h"
+
+#include "ui_window.h"
+#include <qapplication.h>
+#include <QtGui>
+#include <QObject>
 
 #include "readsound.h"
 #include "sourcefunction.h"
-#include "portaudio.h"
-#include "pa_util.h"
 #include "streamsound.h"
+
+#include "IO/IO.h"
+
 
 #define MAX_BUFFER_DOUBLE (500000)
 
 using namespace std; 
 
 
-int main() {
+
+int main(int argc, char ** argv) {
 
     cout  << "project starts!" << endl; 
 
-    Eigen::MatrixXd * sound = new Eigen::MatrixXd(); 
-    SoundReader::wavreader("./sound/test.wav", 20000, sound); 
-    SourceFunction * sf = new SourceFunction(10, cylinder, sound);
+    Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
+    //SoundReader::wavreader("./sound/test.wav", 20000, sound); 
+    IO::readMatrixXd(*sound, "./sound/g.dat", BINARY); 
 
-    MyPortaudioClass * test = new MyPortaudioClass(); 
+    SourceFunction * sf = new SourceFunction(10, cylinder, sound);
+    Engine eng; 
+    eng.addSF(sf); 
 
     cout << "Initialzing audio streaming.. " << endl; 
-    Engine eng; 
-    eng.OpenStream(); 
     eng.InitStream(); 
-    eng.StartStream(); 
-    eng.StopStream(); 
-    eng.CloseStream(); 
+    eng.OpenStream(); 
+    //eng.StartStream(); 
+
+    //sleep(50);
+    //eng.StopStream(); 
+    //eng.CloseStream(); 
 
 
 
+
+
+    QApplication application(argc,argv);
+    GUI gui; 
+    gui.setQA(&application); 
+    gui.setUI(); 
+
+    //eng.setQA(&application);
+    //eng.setUI();
+
+    Viewer viewer;
+
+    viewer.setWindowTitle("keyboardAndMouse");
+
+    viewer.show();
+
+
+    return application.exec();
 
 
 
@@ -52,7 +84,5 @@ int main() {
     //                                 test);                            // userData
 
     // create opengl window to do swinging test based on mouse movement
-
-    return 0;
 
 }
