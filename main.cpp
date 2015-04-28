@@ -48,40 +48,23 @@ int main(int argc, char ** argv) {
     //eng.CloseStream(); 
 
 
-
-
-
     QApplication application(argc,argv);
-    GUI gui; 
-    gui.setQA(&application); 
-    gui.setUI(); 
+    VisualGUI vgui(&eng); 
+    AudioGUI  agui(&eng,&vgui); 
+
+    //gui.show();
 
     //eng.setQA(&application);
     //eng.setUI();
 
-    Viewer viewer;
+    //Viewer viewer;
 
-    viewer.setWindowTitle("keyboardAndMouse");
+    //viewer.setWindowTitle("keyboardAndMouse");
 
-    viewer.show();
+    //viewer.show();
 
 
     return application.exec();
-
-
-
-    //PaError err = Pa_OpenStream(
-    //                            &stream,
-    //                            NULL, /* no input */
-    //                            &outputParameters,
-    //                            SAMPLE_RATE,
-    //                            FRAMES_PER_BUFFER,
-    //                            paClipOff,      /* we won't output out of range samples so don't bother clipping them */
-    //                            patestCallback,
-    //                            &data );
-    //PaError pa_error = Pa_OpenStream(
-    //                                 &MyPortaudioClass::myPaCallback,  // streamCallback
-    //                                 test);                            // userData
 
     // create opengl window to do swinging test based on mouse movement
 

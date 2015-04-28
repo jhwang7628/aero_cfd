@@ -1,17 +1,25 @@
 #ifndef UI_WINDOW_H
 #define UI_WINDOW_H
 
-#include <qapplication.h>
-#include <QtGui>
-#include <QObject>
+#include <QWidget>
 #include <QPushButton>
-
+#include <qapplication.h>
 #include <QGLViewer/qglviewer.h>
 
-class Viewer : public QGLViewer
+#include "streamsound.h"
+
+
+class Engine;
+class VisualGUI : public QGLViewer
 {
+
+    private :
+        Engine * _eng; 
+        bool _wireframe; 
+        bool _flatShading;
+            
     public:
-        Viewer() : wireframe_(false), flatShading_(false) {};
+        VisualGUI(Engine * eng) : _eng(eng) {}
 
     protected :
         virtual void draw();
@@ -21,42 +29,39 @@ class Viewer : public QGLViewer
 
         virtual QString helpString() const;
 
-    private :
-        bool wireframe_, flatShading_;
 };
 
-class streamControlPushButton : public QPushButton
+
+class AudioStreamButton : public QPushButton
 {
     Q_OBJECT
 
     public : 
-        streamControlPushButton(const QString & c) : QPushButton(c) {}
-
-        public slots: 
-        void QOpenStream(){}
-
-}; 
-
-
-class AudioGUI : public QWidget
-{
-
-
-    QApplication * _application; 
-
-    QWidget window; 
-    streamControlPushButton *startStreamButton; 
-
-
-    public : 
-
-    GUI(){}
-    ~GUI(){}
-
-    void setQA(QApplication * qa);
-    void setUI(); 
+        AudioStreamButton(const QString &text, QWidget *parent=0); 
 
 };
 
+class AudioGUI : public QWidget
+{
+    Q_OBJECT
+
+    private : 
+        Engine * _eng; 
+        VisualGUI * _vgui; 
+        AudioStreamButton * _startStreamButton; 
+        AudioStreamButton * _stopStreamButton; 
+
+    public : 
+        AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent=0); 
+        ~AudioGUI(){}
+
+    private slots : 
+        void startStreamClicked(); 
+        void stopStreamClicked(); 
+
+    //void setQA(QApplication * qa);
+    //void setUI(); 
+
+};
 
 #endif

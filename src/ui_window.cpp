@@ -1,18 +1,69 @@
 #include "ui_window.h"
 
-#include <QMenu>
-#include <QKeyEvent>
-#include <QMouseEvent>
-#include <QMap>
-#include <QCursor>
+#include <QtGui>
 
 #include <math.h>
 
 using namespace std;
 
-// Draws a spiral
-void Viewer::draw()
+
+
+AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(parent), _eng(eng), _vgui(vgui)
 {
+    /* to be exception-safe. */
+    _startStreamButton = new AudioStreamButton("Start stream", this); 
+    _stopStreamButton  = new AudioStreamButton("Stop stream", this); 
+
+    connect(_startStreamButton, SIGNAL(clicked()), 
+            this, SLOT(startStreamClicked())); 
+    connect(_stopStreamButton, SIGNAL(clicked()), 
+            this, SLOT(stopStreamClicked())); 
+
+
+    /* set button layout */
+
+    QGridLayout *mainLayout = new QGridLayout; 
+
+    mainLayout->addWidget(_vgui, 0, 0);
+    mainLayout->addWidget(_startStreamButton, 1, 0); 
+    mainLayout->addWidget(_stopStreamButton, 2, 0); 
+
+    setLayout(mainLayout); 
+    setWindowTitle("Audio Control Panel");
+    resize(320, 240); 
+
+    show(); 
+}
+
+
+void AudioGUI::startStreamClicked() 
+{
+    cout << "Starting audio stream..." << endl; 
+    _eng->StartStream(); 
+}
+void AudioGUI::stopStreamClicked() 
+{
+
+    cout << "Stoping audio stream..." << endl; 
+    _eng->StopStream();
+}
+
+AudioStreamButton::AudioStreamButton(const QString &text, QWidget *parent) : QPushButton(text, parent)
+{
+    //do nothing
+}
+
+
+
+
+
+// Draws a spiral
+void VisualGUI::draw()
+{
+
+
+
+    /* testing */
     const float nbSteps = 80.0;
 
     glBegin(GL_QUAD_STRIP);
@@ -35,30 +86,18 @@ void Viewer::draw()
     glEnd();
 }
 
-void Viewer::init()
+void VisualGUI::init()
 {
     // Restore previous viewer state.
     restoreStateFromFile();
-
-
-    /////////////////////////////////////////////////////
-    //       Keyboard shortcut customization           //
-    //      Changes standard action key bindings       //
-    /////////////////////////////////////////////////////
-
-    // Define 'Control+Q' as the new exit shortcut (default was 'Escape')
-    setShortcut(EXIT_VIEWER, Qt::CTRL+Qt::Key_Q);
 
     // Set 'Control+F' as the FPS toggle state key.
     setShortcut(DISPLAY_FPS, Qt::CTRL+Qt::Key_F);
 
     // Disable draw grid toggle shortcut (default was 'G')
-    setShortcut(DRAW_GRID, 0);
+    //setShortcut(DRAW_GRID, 0);
 
 
-    // Add custom key description (see keyPressEvent).
-    setKeyDescription(Qt::Key_W, "Toggles wire frame display");
-    setKeyDescription(Qt::Key_F, "Toggles flat shading display");
 
 
     /////////////////////////////////////////////////////
@@ -79,18 +118,10 @@ void Viewer::init()
     // Add custom mouse bindings description (see mousePressEvent())
     setMouseBindingDescription(Qt::NoModifier, Qt::RightButton, "Opens a camera path context menu");
 
-    // Display the help window. The help window tabs are automatically updated when you define new
-    // standard key or mouse bindings (as is done above). Custom bindings descriptions are added using
-    // setKeyDescription() and setMouseBindingDescription().
-    help();
 }
 
 
-///////////////////////////////////////////////
-//      Define new key bindings : F & W      //
-///////////////////////////////////////////////
-
-void Viewer::keyPressEvent(QKeyEvent *e)
+void VisualGUI::keyPressEvent(QKeyEvent *e)
 {
     // Get event modifiers key
     const Qt::KeyboardModifiers modifiers = e->modifiers();
@@ -101,8 +132,8 @@ void Viewer::keyPressEvent(QKeyEvent *e)
     bool handled = false;
     if ((e->key()==Qt::Key_W) && (modifiers==Qt::NoButton))
     {
-        wireframe_ = !wireframe_;
-        if (wireframe_)
+        _wireframe = !_wireframe;
+        if (_wireframe)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -112,8 +143,8 @@ void Viewer::keyPressEvent(QKeyEvent *e)
     else
         if ((e->key()==Qt::Key_F) && (modifiers==Qt::NoButton))
         {
-            flatShading_ = !flatShading_;
-            if (flatShading_)
+            _flatShading = !_flatShading;
+            if (_flatShading)
                 glShadeModel(GL_FLAT);
             else
                 glShadeModel(GL_SMOOTH);
@@ -127,12 +158,7 @@ void Viewer::keyPressEvent(QKeyEvent *e)
 }
 
 
-///////////////////////////////////////////////////////////
-//             Define new mouse bindings                 //
-//   A camera viewpoint menu binded on right button      //
-///////////////////////////////////////////////////////////
-
-void Viewer::mousePressEvent(QMouseEvent* e)
+void VisualGUI::mousePressEvent(QMouseEvent* e)
 {
     if ((e->button() == Qt::RightButton) && (e->modifiers() == Qt::NoButton))
     {
@@ -171,7 +197,7 @@ void Viewer::mousePressEvent(QMouseEvent* e)
         QGLViewer::mousePressEvent(e);
 }
 
-QString Viewer::helpString() const
+QString VisualGUI::helpString() const
 {
     QString text("<h2>K e y b o a r d A n d M o u s e</h2>");
     text += "This example illustrates the mouse and key bindings customization.<br><br>";
@@ -188,12 +214,14 @@ QString Viewer::helpString() const
 }
 
 
-void GUI::setQA(QApplication * qa) 
+
+#if 0
+void AudioGUI::setQA(QApplication * qa) 
 {
     _application = qa; 
 }
 
-void GUI::setUI()
+void AudioGUI::setUI()
 {
 
     startStreamButton = new streamControlPushButton("&Start audio stream.");
@@ -216,3 +244,5 @@ void GUI::setUI()
 //{
 //    _audio_engine->OpenStream(); 
 //}
+
+#endif

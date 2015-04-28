@@ -7,9 +7,7 @@
 #include <math.h>
 
 #include "ui_window.h"
-#include <qapplication.h>
 #include <QtGui>
-#include <QObject>
 
 #include "portaudio.h"
 #include "pa_util.h"
