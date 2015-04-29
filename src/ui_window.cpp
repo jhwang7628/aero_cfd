@@ -10,27 +10,37 @@ using namespace std;
 
 AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(parent), _eng(eng), _vgui(vgui)
 {
+    /* gain two-way communication */
+    vgui->set_agui(this); 
+
     /* to be exception-safe. */
     _startStreamButton = new AudioStreamButton("Start stream", this); 
     _stopStreamButton  = new AudioStreamButton("Stop stream", this); 
+    _maxspeedSlider = new QSlider(Qt::Vertical, this); 
 
     connect(_startStreamButton, SIGNAL(clicked()), 
             this, SLOT(startStreamClicked())); 
     connect(_stopStreamButton, SIGNAL(clicked()), 
             this, SLOT(stopStreamClicked())); 
+    connect(_maxspeedSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(updateMaxspeed()));
 
+    _maxspeedSlider->setRange(0,150); 
+    _maxspeedSlider->setValue(25); 
+    _maxspeedSlider->setPageStep(1);
 
     /* set button layout */
 
     QGridLayout *mainLayout = new QGridLayout; 
 
     mainLayout->addWidget(_vgui, 0, 0);
+    mainLayout->addWidget(_maxspeedSlider, 0, 1); 
     mainLayout->addWidget(_startStreamButton, 1, 0); 
     mainLayout->addWidget(_stopStreamButton, 2, 0); 
 
     setLayout(mainLayout); 
     setWindowTitle("Audio Control Panel");
-    resize(320, 240); 
+    resize(800, 600); 
 
     show(); 
 }
@@ -48,6 +58,12 @@ void AudioGUI::stopStreamClicked()
     _eng->StopStream();
 }
 
+void AudioGUI::updateMaxspeed()
+{
+    cout << "Max speed = " << getMaxspeed() << endl;
+}
+
+
 AudioStreamButton::AudioStreamButton(const QString &text, QWidget *parent) : QPushButton(text, parent)
 {
     //do nothing
@@ -60,7 +76,7 @@ AudioStreamButton::AudioStreamButton(const QString &text, QWidget *parent) : QPu
 // Draws a spiral
 void VisualGUI::draw()
 {
-
+#if 0
 
 
     /* testing */
@@ -84,12 +100,16 @@ void VisualGUI::draw()
         glVertex3f(r2*c, alt+0.05, r2*s);
     }
     glEnd();
+#endif
 }
 
 void VisualGUI::init()
 {
     // Restore previous viewer state.
     restoreStateFromFile();
+
+    // set mouse tracking
+    setMouseTracking(true); 
 
     // Set 'Control+F' as the FPS toggle state key.
     setShortcut(DISPLAY_FPS, Qt::CTRL+Qt::Key_F);
@@ -106,17 +126,17 @@ void VisualGUI::init()
     /////////////////////////////////////////////////////
 
     // Left and right buttons together make a camera zoom : emulates a mouse third button if needed.
-    setMouseBinding(Qt::Key_Z, Qt::NoModifier, Qt::LeftButton, CAMERA, ZOOM);
+    //setMouseBinding(Qt::Key_Z, Qt::NoModifier, Qt::LeftButton, CAMERA, ZOOM);
 
-    // Disable previous TRANSLATE mouse binding (and remove it from help mouse tab).
-    setMouseBinding(Qt::NoModifier, Qt::RightButton, NO_CLICK_ACTION);
+    //// Disable previous TRANSLATE mouse binding (and remove it from help mouse tab).
+    //setMouseBinding(Qt::NoModifier, Qt::RightButton, NO_CLICK_ACTION);
 
-    setMouseBinding(Qt::ControlModifier | Qt::ShiftModifier, Qt::RightButton, SELECT);
-    setWheelBinding(Qt::AltModifier, CAMERA, MOVE_FORWARD);
-    setMouseBinding(Qt::AltModifier, Qt::LeftButton, CAMERA, TRANSLATE);
+    //setMouseBinding(Qt::ControlModifier | Qt::ShiftModifier, Qt::RightButton, SELECT);
+    //setWheelBinding(Qt::AltModifier, CAMERA, MOVE_FORWARD);
+    //setMouseBinding(Qt::AltModifier, Qt::LeftButton, CAMERA, TRANSLATE);
 
-    // Add custom mouse bindings description (see mousePressEvent())
-    setMouseBindingDescription(Qt::NoModifier, Qt::RightButton, "Opens a camera path context menu");
+    //// Add custom mouse bindings description (see mousePressEvent())
+    //setMouseBindingDescription(Qt::NoModifier, Qt::RightButton, "Opens a camera path context menu");
 
 }
 
@@ -158,10 +178,61 @@ void VisualGUI::keyPressEvent(QKeyEvent *e)
 }
 
 
+
+#if 0
+QString VisualGUI::helpString() const
+{
+    QString text("<h2>K e y b o a r d A n d M o u s e</h2>");
+    text += "This example illustrates the mouse and key bindings customization.<br><br>";
+    text += "Use <code>setShortcut()</code> to change standard action key bindings (display of axis, grid or fps, exit shortcut...).<br><br>";
+    text += "Use <code>setMouseBinding()</code> and <code>setWheelBinding()</code> to change standard action mouse bindings ";
+    text += "(camera rotation, translation, object selection...).<br><br>";
+    text += "If you want to define <b>new</b> key or mouse actions, overload <code>keyPressEvent()</code> and/or ";
+    text += "<code>mouse(Press|Move|Release)Event()</code> to define and bind your own new actions. ";
+    text += "Use <code>setKeyDescription()</code> and <code>setMouseBindingDescription()</code> to add a description of your bindings in the help window.<br><br>";
+    text += "In this example, we defined the <b>F</b> and <b>W</b> keys and the right mouse button opens a popup menu. ";
+    text += "See the keyboard and mouse tabs in this help window for the complete bindings description.<br><br>";
+    text += "By the way, exit shortcut has been binded to <b>Ctrl+Q</b>.";
+    return text;
+}
+#endif 
+
+void VisualGUI::computeMouseSpeed(const QMouseEvent * const e)
+{
+    const QPoint delta = (e->pos() - _prevPos);
+    _prevPos = e->pos(); 
+    const float dist = sqrt(static_cast<float>(delta.x()*delta.x() + delta.y()*delta.y()));
+    _delay = _lastMoveTime.restart();
+    if (_delay == 0) // Less than a millisecond: assume delay = 1ms
+        _mouseSpeed = dist;
+    else
+        _mouseSpeed = dist/_delay;
+}
+
+void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
+{
+
+    if (e->modifiers() == Qt::AltModifier)
+        computeMouseSpeed(e); 
+    else 
+        _mouseSpeed = 0.0;
+
+    _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed())); 
+    //cout << "mouse speed = " << _mouseSpeed << endl;
+
+}
+
 void VisualGUI::mousePressEvent(QMouseEvent* e)
 {
+#if 0
+    cout << "mouse pressed! " << endl;
+
+    cout << hasMouseTracking() << endl;
+
+
     if ((e->button() == Qt::RightButton) && (e->modifiers() == Qt::NoButton))
     {
+        cout << " hehe " << endl;
         QMenu menu( this );
         menu.addAction("Camera positions");
         menu.addSeparator();
@@ -195,25 +266,8 @@ void VisualGUI::mousePressEvent(QMouseEvent* e)
     }
     else
         QGLViewer::mousePressEvent(e);
+#endif
 }
-
-QString VisualGUI::helpString() const
-{
-    QString text("<h2>K e y b o a r d A n d M o u s e</h2>");
-    text += "This example illustrates the mouse and key bindings customization.<br><br>";
-    text += "Use <code>setShortcut()</code> to change standard action key bindings (display of axis, grid or fps, exit shortcut...).<br><br>";
-    text += "Use <code>setMouseBinding()</code> and <code>setWheelBinding()</code> to change standard action mouse bindings ";
-    text += "(camera rotation, translation, object selection...).<br><br>";
-    text += "If you want to define <b>new</b> key or mouse actions, overload <code>keyPressEvent()</code> and/or ";
-    text += "<code>mouse(Press|Move|Release)Event()</code> to define and bind your own new actions. ";
-    text += "Use <code>setKeyDescription()</code> and <code>setMouseBindingDescription()</code> to add a description of your bindings in the help window.<br><br>";
-    text += "In this example, we defined the <b>F</b> and <b>W</b> keys and the right mouse button opens a popup menu. ";
-    text += "See the keyboard and mouse tabs in this help window for the complete bindings description.<br><br>";
-    text += "By the way, exit shortcut has been binded to <b>Ctrl+Q</b>.";
-    return text;
-}
-
-
 
 #if 0
 void AudioGUI::setQA(QApplication * qa) 

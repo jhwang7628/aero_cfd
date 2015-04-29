@@ -6,7 +6,8 @@ using namespace std;
 MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF(allSF), 
                                                             _thisSF(_allSF.begin()),
                                                             _timeStamp(0), 
-                                                            globalAbsMax(0.0)
+                                                            _globalAbsMax(0.0), 
+                                                            _extraScaling(1.0)
     {
         _data = new stereo(); 
 
@@ -56,7 +57,12 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 inline void MyPortaudioClass::computeGlobalMax()
 {
     for (const SourceFunction * sf : _allSF)
-        globalAbsMax = max(sf->getmax(), globalAbsMax); 
+        _globalAbsMax = max(sf->getmax(), _globalAbsMax); 
+}
+
+inline void MyPortaudioClass::pasetExtraScaling(const double scale)
+{
+    _extraScaling = scale;
 }
 
 inline void MyPortaudioClass::timeStep(int dt)
@@ -82,8 +88,10 @@ inline void MyPortaudioClass::syncSF()
 
 inline void MyPortaudioClass::computePhase()
 {
-    _data->left_phase =  (_data->gx + _data->gy + _data->gz)/globalAbsMax; 
-    _data->right_phase = (_data->gx + _data->gy + _data->gz)/globalAbsMax; 
+    _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
+    //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
+    //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
+    _data->right_phase = _data->left_phase; 
 }
 
 
@@ -160,6 +168,11 @@ void Engine::CloseStream()
 
     if (_err != paNoError)
         printf("Cannot close stream. %s\n", Pa_GetErrorText(_err)); 
+}
+
+void Engine::setExtraScaling(const double scale)
+{
+    _mypa->pasetExtraScaling(scale);
 }
 
 void Engine::addSF(const SourceFunction * sf)

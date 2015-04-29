@@ -36,7 +36,8 @@ class MyPortaudioClass
     vector<const SourceFunction*>::iterator _thisSF; 
 
     int _timeStamp;
-    double globalAbsMax; 
+    double _globalAbsMax; 
+    double _extraScaling; 
 
     public : 
 
@@ -59,6 +60,7 @@ class MyPortaudioClass
 
 
     inline void computeGlobalMax(); 
+    inline void pasetExtraScaling(const double scale); 
     inline void computePhase();
 
     /* 
@@ -69,7 +71,7 @@ class MyPortaudioClass
 
     void syncSF(); 
 
-    
+
 
 };
 
@@ -86,8 +88,8 @@ class Engine
     public : 
 
     Engine() : _stream(NULL), 
-               _mypa(NULL), 
-               _streamStarted(false) { } 
+    _mypa(NULL), 
+    _streamStarted(false) { } 
 
     ~Engine() {}
 
@@ -99,6 +101,7 @@ class Engine
     void StopStream();
     void CloseStream(); 
 
+    void setExtraScaling(const double scale);
     void addSF(const SourceFunction * sf);
 
 }; 
