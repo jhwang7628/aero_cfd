@@ -31,6 +31,7 @@ class MyPortaudioClass
     } stereo; 
 
     stereo * _data;
+    int currentTextureTime; 
 
     vector<const SourceFunction*> _allSF;
     vector<const SourceFunction*>::iterator _thisSF; 
@@ -73,13 +74,8 @@ class MyPortaudioClass
     {
         _extraScaling = scale;
     }
-    inline void computePhase()
-    {
-        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
-        //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
-        //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
-        _data->right_phase = _data->left_phase; 
-    }
+
+    void computePhase();
 
     inline void syncSF()
     {
@@ -87,10 +83,6 @@ class MyPortaudioClass
         _data->gy = (*_thisSF)->getgy(_timeStamp); 
         _data->gz = (*_thisSF)->getgz(_timeStamp); 
     }
-
-
-
-
 
 };
 

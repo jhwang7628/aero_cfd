@@ -25,8 +25,8 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
     connect(_maxspeedSlider, SIGNAL(valueChanged(int)),
             this, SLOT(updateMaxspeed()));
 
-    _maxspeedSlider->setRange(0,150); 
-    _maxspeedSlider->setValue(25); 
+    _maxspeedSlider->setRange(10, 30); 
+    _maxspeedSlider->setValue(30); 
     _maxspeedSlider->setPageStep(1);
 
     /* set button layout */
@@ -217,7 +217,7 @@ void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
     else 
         _mouseSpeed = 0.0;
 
-    _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed())); 
+    _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
     //cout << "mouse speed = " << _mouseSpeed << endl;
 
 }

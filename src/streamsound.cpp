@@ -1,5 +1,7 @@
 #include "streamsound.h"
 #include <iostream>
+#include <cmath>
+#include "parameters.h"
 
 using namespace std; 
 
@@ -58,7 +60,18 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 
 void MyPortaudioClass::timeStep(int dt)
 {
+
+#ifdef UPSAMPLE_RATIO
+    int incre = (int)(UPSAMPLE_RATIO*_extraScaling); 
+    incre = fmax(incre, 12); 
+    incre = fmin(incre, 12);
+    _timeStamp += dt*UPSAMPLE_RATIO;
+    //if (incre != 0)
+    //    printf("_extraScaling = %f, incre = %i, _timeStamp = %i\n",_extraScaling, incre, _timeStamp);
+#else 
     _timeStamp += dt; 
+#endif
+
     if (_timeStamp >= (*_thisSF)->maxTimeStep)
         _timeStamp = _timeStamp - (*_thisSF)->maxTimeStep; 
 
@@ -68,6 +81,14 @@ void MyPortaudioClass::timeStep(int dt)
 void MyPortaudioClass::timeStep()
 {
     timeStep(1);
+}
+
+void MyPortaudioClass::computePhase()
+{
+    _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
+    //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
+    //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
+    _data->right_phase = _data->left_phase; 
 }
 
 void Engine::InitStream()

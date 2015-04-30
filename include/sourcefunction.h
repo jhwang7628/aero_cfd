@@ -16,7 +16,6 @@ class SourceFunction
 
     double _localAbsMax; 
 
-
     public : 
 
     const int maxTimeStep; 
@@ -25,16 +24,21 @@ class SourceFunction
 
     ~SourceFunction(); 
 
-    inline void computeLocalAbsMax()
-    {
-        _localAbsMax = max(_g->maxCoeff(),-1.0*_g->minCoeff()); 
-    }
 
     double getBaseSpeed() const
     {
         return _baseSpeed; 
     }
+
+    Eigen::MatrixXd * postProcessG(const Eigen::MatrixXd * g);
+
     const char * getShapeName() const; 
+
+
+    inline void computeLocalAbsMax()
+    {
+        _localAbsMax = max(_g->maxCoeff(),-1.0*_g->minCoeff()); 
+    }
     inline double getgx(int t) const
     {
         return (*_g)(t,0); 
