@@ -54,18 +54,9 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     return paContinue;
 }
 
-inline void MyPortaudioClass::computeGlobalMax()
-{
-    for (const SourceFunction * sf : _allSF)
-        _globalAbsMax = max(sf->getmax(), _globalAbsMax); 
-}
 
-inline void MyPortaudioClass::pasetExtraScaling(const double scale)
-{
-    _extraScaling = scale;
-}
 
-inline void MyPortaudioClass::timeStep(int dt)
+void MyPortaudioClass::timeStep(int dt)
 {
     _timeStamp += dt; 
     if (_timeStamp >= (*_thisSF)->maxTimeStep)
@@ -74,27 +65,10 @@ inline void MyPortaudioClass::timeStep(int dt)
     syncSF(); 
 }
 
-inline void MyPortaudioClass::timeStep()
+void MyPortaudioClass::timeStep()
 {
     timeStep(1);
 }
-
-inline void MyPortaudioClass::syncSF()
-{
-    _data->gx = (*_thisSF)->getgx(_timeStamp); 
-    _data->gy = (*_thisSF)->getgy(_timeStamp); 
-    _data->gz = (*_thisSF)->getgz(_timeStamp); 
-}
-
-inline void MyPortaudioClass::computePhase()
-{
-    _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
-    //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
-    //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
-    _data->right_phase = _data->left_phase; 
-}
-
-
 
 void Engine::InitStream()
 {

@@ -58,18 +58,37 @@ class MyPortaudioClass
             ->myMemberCallback(input, output, frameCount, timeInfo, statusFlags);
     }
 
-
-    inline void computeGlobalMax(); 
-    inline void pasetExtraScaling(const double scale); 
-    inline void computePhase();
-
     /* 
      * Move the time stamp dt unit further; if dt not specified step 1 unit.
      */
-    inline void timeStep(int dt);
-    inline void timeStep(); 
+    void timeStep(int dt);
+    void timeStep(); 
 
-    void syncSF(); 
+    inline void computeGlobalMax()
+    {
+        for (const SourceFunction * sf : _allSF)
+            _globalAbsMax = max(sf->getmax(), _globalAbsMax); 
+    }
+    inline void pasetExtraScaling(const double scale)
+    {
+        _extraScaling = scale;
+    }
+    inline void computePhase()
+    {
+        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
+        //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
+        //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
+        _data->right_phase = _data->left_phase; 
+    }
+
+    inline void syncSF()
+    {
+        _data->gx = (*_thisSF)->getgx(_timeStamp); 
+        _data->gy = (*_thisSF)->getgy(_timeStamp); 
+        _data->gz = (*_thisSF)->getgz(_timeStamp); 
+    }
+
+
 
 
 

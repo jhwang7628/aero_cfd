@@ -9,6 +9,7 @@ HEADERS += ./include/readsound.h \
            ./include/ui_window.h
 
 SOURCES += ./main.cpp \ 
+           ./src/sourcefunction.cpp \
            ./src/streamsound.cpp \
            ./src/ui_window.cpp
 
