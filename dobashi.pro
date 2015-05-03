@@ -1,5 +1,5 @@
 TARGET = dobashi 
-CONFIG += qt opengl release c++11
+CONFIG += qt opengl debug c++11 
 QMAKE_CXXFLAGS += -std=c++11 -Wno-deprecated-register
 QT += opengl xml widgets
 

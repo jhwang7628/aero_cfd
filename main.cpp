@@ -24,8 +24,6 @@
 
 using namespace std; 
 
-
-
 int main(int argc, char ** argv) {
 
     cout  << "project starts!" << endl; 
@@ -51,6 +49,7 @@ int main(int argc, char ** argv) {
     QApplication application(argc,argv);
     VisualGUI vgui(&eng); 
     AudioGUI  agui(&eng,&vgui); 
+    eng.setGUIs(&agui, &vgui);
 
     //gui.show();
 

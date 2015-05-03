@@ -15,6 +15,7 @@
 
 using namespace std; 
 
+class Engine;
 class MyPortaudioClass
 {
     typedef struct stereo
@@ -31,16 +32,16 @@ class MyPortaudioClass
     } stereo; 
 
     stereo * _data;
-    int currentTextureTime; 
 
     vector<const SourceFunction*> _allSF;
     vector<const SourceFunction*>::iterator _thisSF; 
+
+    Engine * _eng;
 
     int _timeStamp;
     double _globalAbsMax; 
     double _extraScaling; 
     bool _frequencyShift;
-
 
     public : 
 
@@ -61,12 +62,6 @@ class MyPortaudioClass
             ->myMemberCallback(input, output, frameCount, timeInfo, statusFlags);
     }
 
-    /* 
-     * Move the time stamp dt unit further; if dt not specified step 1 unit.
-     */
-    void timeStep(int dt);
-    void timeStep(); 
-
     inline void computeGlobalMax()
     {
         for (const SourceFunction * sf : _allSF)
@@ -77,36 +72,40 @@ class MyPortaudioClass
         _extraScaling = scale;
     }
 
-    void computePhase();
-
-    inline void syncSF()
-    {
-        _data->gx = (*_thisSF)->getgx(_timeStamp); 
-        _data->gy = (*_thisSF)->getgy(_timeStamp); 
-        _data->gz = (*_thisSF)->getgz(_timeStamp); 
-    }
-
     inline void toggleFrequencyShift(); 
     inline bool getFrequencyShift();
+
+    void setEng(Engine * eng) 
+    {
+        _eng = eng; 
+    }
 
 
 };
 
+class VisualGUI; 
+class AudioGUI;
+
 class Engine
 {
 
+    PaStreamParameters _outputParameters; 
     PaStream * _stream;
     PaError _err; 
     vector<const SourceFunction*> _allSF; 
     MyPortaudioClass * _mypa; 
+    AudioGUI * _agui; 
+    VisualGUI * _vgui; 
+
+    
 
     bool _streamStarted; 
 
     public : 
 
     Engine() : _stream(NULL), 
-    _mypa(NULL), 
-    _streamStarted(false) { } 
+               _mypa(NULL), 
+               _streamStarted(false) { } 
 
     ~Engine() {}
 
@@ -122,6 +121,19 @@ class Engine
     void addSF(const SourceFunction * sf);
 
     void toggleFrequencyShift(); 
+
+    void setGUIs(AudioGUI * agui, VisualGUI * vgui); 
+    
+
+}; 
+
+/* Store some useful sndstate parameters */
+class sndState
+{
+
+    public : 
+        static double currMouseSpeed; 
+        static double prevMouseSpeed;
 
 }; 
 

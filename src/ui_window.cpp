@@ -217,10 +217,15 @@ void VisualGUI::computeMouseSpeed(const QMouseEvent * const e)
     const float dist = sqrt(static_cast<float>(delta.x()*delta.x() + delta.y()*delta.y()));
     _delay = _lastMoveTime.restart();
     //cout << "refresh rate = " << 1.0/_delay*1000 << endl; 
+    _prevMouseSpeed = _mouseSpeed; 
+
     if (_delay == 0) // Less than a millisecond: assume delay = 1ms
         _mouseSpeed = dist;
     else
         _mouseSpeed = dist/_delay;
+
+    sndState::prevMouseSpeed = _prevMouseSpeed; 
+    sndState::currMouseSpeed = _mouseSpeed;
 
     /* set the mouse speed to zero if inside bufferzone */
     if (((width()-mousePos.x())<PARAMETERS::BUFFERZONE) || ((height()-mousePos.y())<PARAMETERS::BUFFERZONE) || mousePos.x() < PARAMETERS::BUFFERZONE || mousePos.y() < PARAMETERS::BUFFERZONE)
@@ -235,12 +240,12 @@ void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
     else 
         _mouseSpeed = 0.0;
 
-
-
     _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
+
     //cout << "mouse speed = " << _mouseSpeed << endl;
 
 }
+
 
 void VisualGUI::mousePressEvent(QMouseEvent* e)
 {

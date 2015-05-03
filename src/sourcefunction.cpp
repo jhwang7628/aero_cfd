@@ -28,6 +28,7 @@ Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const
 
     Eigen::MatrixXd * gProcessed = new Eigen::MatrixXd(); 
 
+    /* Linear interpolation */
     gProcessed->setZero(g->rows()*PARAMETERS::UPSAMPLE_RATIO, g->cols()); 
     for (int ii=0; ii<g->rows(); ii++) 
     {
@@ -46,6 +47,12 @@ Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const
             count += 1.0; 
         }
     }
+
+
+
+
+
+
 
     return gProcessed; 
 

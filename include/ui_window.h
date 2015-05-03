@@ -24,6 +24,7 @@ class VisualGUI : public QGLViewer
 
         QTime _lastMoveTime; 
         int _delay; 
+        double _prevMouseSpeed; 
         double _mouseSpeed;
 	    QPoint _prevPos, _pressPos;
 
@@ -87,5 +88,6 @@ class AudioGUI : public QWidget
         //void setUI(); 
 
 };
+
 
 #endif

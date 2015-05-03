@@ -15,7 +15,7 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
     {
         _data = new stereo(); 
 
-        syncSF(); 
+        //syncSF(); 
         computeGlobalMax();
         //printf("MyPortaudioClass instantiated. left_phase = %f, right_phase = %f\n", _data->left_phase, _data->right_phase); 
         //printf("how many source function do I have now? %lu\n", _allSF.size()); 
@@ -34,60 +34,46 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) input; 
 
     unsigned int ii; 
+
+
+    /* make sure the mouse speed is frozen. */
+    double prevScale = sndState::prevMouseSpeed/15.0;
+    double currScale = sndState::currMouseSpeed/15.0;
+    double alpha; 
+    double scale; //blended scales
+
     for (ii=0; ii<frameCount; ii++) 
     {
+        alpha = ii/frameCount; 
+        scale = (1.0 - alpha)*prevScale + alpha*currScale; 
 
         *out++ = (float) _data->left_phase; 
         *out++ = (float) _data->right_phase; 
 
-        computePhase();
-        timeStep(); 
+        /* compute the phase */
+        //_data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
+        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*scale; 
+        _data->right_phase = _data->left_phase; 
+
+        /* time step the signal */
+        int incre = (int)(PARAMETERS::UPSAMPLE_RATIO*_extraScaling); 
+
+        if (_frequencyShift)
+            _timeStamp += incre;
+        else 
+            _timeStamp += PARAMETERS::UPSAMPLE_RATIO;
+
+        _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+
+        _data->gx = (*_thisSF)->getgx(_timeStamp); 
+        _data->gy = (*_thisSF)->getgy(_timeStamp); 
+        _data->gz = (*_thisSF)->getgz(_timeStamp); 
 
     }
-    
-    
-    //_data->outTime = timeInfo->outputBufferDacTime;
-    //printf("----------------------\n"); 
-    //printf("g = %f, %f, %f at time = %f\n", _data->gx, _data->gy, _data->gz, _data->outTime); 
-    //printf("left_phase = %f, right_phase = %f\n", _data->left_phase, _data->right_phase); 
-    //printf("globalAbsMax = %f\n", globalAbsMax); 
-
-    // Do what you need (having access to every part of MyPortaudioClass)
-      
       
     return paContinue;
 }
 
-
-
-void MyPortaudioClass::timeStep(int dt)
-{
-
-    int incre = (int)(PARAMETERS::UPSAMPLE_RATIO*_extraScaling); 
-
-    if (_frequencyShift)
-        _timeStamp += dt*incre;
-    else 
-        _timeStamp += dt*PARAMETERS::UPSAMPLE_RATIO;
-
-    if (_timeStamp >= (*_thisSF)->maxTimeStep)
-        _timeStamp = _timeStamp - (*_thisSF)->maxTimeStep; 
-
-    syncSF(); 
-}
-
-void MyPortaudioClass::timeStep()
-{
-    timeStep(1);
-}
-
-void MyPortaudioClass::computePhase()
-{
-    _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
-    //cout << "scale : " << _extraScaling/_globalAbsMax << endl;
-    //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
-    _data->right_phase = _data->left_phase; 
-}
 
 inline void MyPortaudioClass::toggleFrequencyShift()
 {
@@ -122,23 +108,58 @@ void Engine::OpenStream()
     {
         cout << "   - Initializing MyPortaudioClass. " <<endl; 
         _mypa = new MyPortaudioClass(_allSF); 
+        _mypa->setEng(this); 
     }
 
-    Pa_OpenDefaultStream(&_stream,
-            0,          /* no input channels */
-            2,          /* stereo output */
-            paFloat32,  /* 32 bit floating point output */
-            10000,      /* Sampling rate */
-            256,        /* frames per buffer, i.e. the number
-                           of sample frames that PortAudio will
-                           request from the callback. Many apps
-                           may want to use paFramesPerBufferUnspecified, which
-                           tells PortAudio to pick the best,
-                           possibly changing, buffer size.*/
-            &(MyPortaudioClass::myPaCallback), /* this is your callback function */
-            (void*) _mypa); /*This is a pointer that will be passed to your callback*/
-    if (NULL != _stream) 
+    _outputParameters.device = Pa_GetDefaultOutputDevice(); 
+
+    if (_outputParameters.device == paNoDevice) 
+    {
+        printf("**Error: No deafult output device.\n"); 
+        return;
+    }
+
+    _outputParameters.channelCount = 2; 
+    _outputParameters.sampleFormat = paFloat32; 
+    _outputParameters.suggestedLatency = Pa_GetDeviceInfo(_outputParameters.device)->defaultLowOutputLatency; 
+    _outputParameters.hostApiSpecificStreamInfo = NULL; 
+
+    _err = Pa_OpenStream(
+               &_stream,
+               NULL, /* no input */
+               &_outputParameters,
+               10000, /* SAMPLE_RATE, */ 
+               paFramesPerBufferUnspecified, /* FRAMES_PER_BUFFER, */
+               paClipOff,      /* we won't output out of range samples so don't bother clipping them */
+               &(MyPortaudioClass::myPaCallback),
+               (void*) _mypa);
+
+    if (_err != paNoError)
+    {
+        printf("**Error: Cannot start stream. %s\n", Pa_GetErrorText(_err)); 
+        return;
+    }
+    else 
+    {
         cout << "   - Stream opened successfully." << endl; 
+    }
+
+
+    //Pa_OpenDefaultStream(&_stream,
+    //        0,          /* no input channels */
+    //        2,          /* stereo output */
+    //        paFloat32,  /* 32 bit floating point output */
+    //        10000,      /* Sampling rate */
+    //        256,        /* frames per buffer, i.e. the number
+    //                       of sample frames that PortAudio will
+    //                       request from the callback. Many apps
+    //                       may want to use paFramesPerBufferUnspecified, which
+    //                       tells PortAudio to pick the best,
+    //                       possibly changing, buffer size.*/
+    //        &(MyPortaudioClass::myPaCallback), /* this is your callback function */
+    //        (void*) _mypa); /*This is a pointer that will be passed to your callback*/
+    //if (NULL != _stream) 
+    //    cout << "   - Stream opened successfully." << endl; 
 }
 
 void Engine::StartStream()
@@ -197,3 +218,16 @@ void Engine::toggleFrequencyShift()
     _mypa->toggleFrequencyShift(); 
     cout << "Frequency Shift: " << _mypa->getFrequencyShift() << endl;
 }
+
+void Engine::setGUIs(AudioGUI * agui, VisualGUI * vgui) 
+{
+    _agui = agui; 
+    _vgui = vgui; 
+}
+
+///////////////////////////////////////////////////
+  
+  
+  
+double sndState::currMouseSpeed = 0.0; 
+double sndState::prevMouseSpeed = 0.0; 
