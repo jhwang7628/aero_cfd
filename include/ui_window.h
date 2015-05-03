@@ -66,6 +66,7 @@ class AudioGUI : public QWidget
         AudioStreamButton * _startStreamButton; 
         AudioStreamButton * _stopStreamButton; 
         QSlider * _maxspeedSlider; 
+        QCheckBox * _frequencyShiftCheck; 
 
     public : 
         AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent=0); 
@@ -80,6 +81,7 @@ class AudioGUI : public QWidget
             void startStreamClicked(); 
             void stopStreamClicked(); 
             void updateMaxspeed(); 
+            void toggleFrequencyShift(); 
 
         //void setQA(QApplication * qa);
         //void setUI(); 

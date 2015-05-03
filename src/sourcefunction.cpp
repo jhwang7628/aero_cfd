@@ -12,6 +12,8 @@ SourceFunction::SourceFunction(const double bs, const SHAPE s, const Eigen::Matr
         case cylinder : printf("\"%s\"\n", getShapeName());
                         break;
     }
+
+    cout << "maxTimeStep = " << maxTimeStep << endl;
     computeLocalAbsMax();
 }
 
@@ -21,24 +23,25 @@ SourceFunction::~SourceFunction()
         delete _g; 
 }
 
-Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g)
+Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const 
 {
 
     Eigen::MatrixXd * gProcessed = new Eigen::MatrixXd(); 
-    gProcessed->setZero(g->rows()*UPSAMPLE_RATIO, g->cols()); 
+
+    gProcessed->setZero(g->rows()*PARAMETERS::UPSAMPLE_RATIO, g->cols()); 
     for (int ii=0; ii<g->rows(); ii++) 
     {
         double count = 0; 
-        for (int jj=ii*UPSAMPLE_RATIO; jj<(ii+1)*UPSAMPLE_RATIO; jj++) 
+        for (int jj=ii*PARAMETERS::UPSAMPLE_RATIO; jj<(ii+1)*PARAMETERS::UPSAMPLE_RATIO; jj++) 
         {
-            double alpha = count/(double)UPSAMPLE_RATIO; 
+            double alpha = count/(double)PARAMETERS::UPSAMPLE_RATIO; 
 
             int thisTS = ii;
             int nextTS = ii+1; 
             if (ii+1 == g->rows()) 
                 nextTS = 0; // wrap-around
 
-            gProcessed->row(jj) = g->row(thisTS)*alpha + g->row(nextTS)*(1.0-alpha);  // linterp
+            gProcessed->row(jj) = g->row(thisTS)*(1.0-alpha) + g->row(nextTS)*alpha;  // linterp
 
             count += 1.0; 
         }

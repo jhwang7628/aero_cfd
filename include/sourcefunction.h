@@ -30,7 +30,7 @@ class SourceFunction
         return _baseSpeed; 
     }
 
-    Eigen::MatrixXd * postProcessG(const Eigen::MatrixXd * g);
+    Eigen::MatrixXd * postProcessG(const Eigen::MatrixXd * g) const;
 
     const char * getShapeName() const; 
 

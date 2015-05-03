@@ -6,7 +6,9 @@ QT += opengl xml widgets
 HEADERS += ./include/readsound.h \
            ./include/sourcefunction.h \
            ./include/streamsound.h \
-           ./include/ui_window.h
+           ./include/ui_window.h \
+           ./parameters.h
+
 
 SOURCES += ./main.cpp \ 
            ./src/sourcefunction.cpp \

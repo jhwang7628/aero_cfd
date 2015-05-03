@@ -39,6 +39,8 @@ class MyPortaudioClass
     int _timeStamp;
     double _globalAbsMax; 
     double _extraScaling; 
+    bool _frequencyShift;
+
 
     public : 
 
@@ -84,6 +86,10 @@ class MyPortaudioClass
         _data->gz = (*_thisSF)->getgz(_timeStamp); 
     }
 
+    inline void toggleFrequencyShift(); 
+    inline bool getFrequencyShift();
+
+
 };
 
 class Engine
@@ -114,6 +120,8 @@ class Engine
 
     void setExtraScaling(const double scale);
     void addSF(const SourceFunction * sf);
+
+    void toggleFrequencyShift(); 
 
 }; 
 

@@ -1,7 +1,13 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-#define UPSAMPLE_RATIO 140
+class PARAMETERS {
+
+    public : 
+
+    static const int UPSAMPLE_RATIO = 16;
+    static const int BUFFERZONE = 50; // bufferzone for mouse speed detection, measured in pixels
+};
 
 
 

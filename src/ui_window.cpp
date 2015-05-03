@@ -4,6 +4,8 @@
 
 #include <math.h>
 
+#include "parameters.h"
+
 using namespace std;
 
 
@@ -17,6 +19,7 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
     _startStreamButton = new AudioStreamButton("Start stream", this); 
     _stopStreamButton  = new AudioStreamButton("Stop stream", this); 
     _maxspeedSlider = new QSlider(Qt::Vertical, this); 
+    _frequencyShiftCheck = new QCheckBox("Frequency shift", this); 
 
     connect(_startStreamButton, SIGNAL(clicked()), 
             this, SLOT(startStreamClicked())); 
@@ -24,6 +27,8 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
             this, SLOT(stopStreamClicked())); 
     connect(_maxspeedSlider, SIGNAL(valueChanged(int)),
             this, SLOT(updateMaxspeed()));
+    connect(_frequencyShiftCheck, SIGNAL(stateChanged(int)), 
+            this, SLOT(toggleFrequencyShift())); 
 
     _maxspeedSlider->setRange(10, 30); 
     _maxspeedSlider->setValue(30); 
@@ -35,8 +40,10 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
 
     mainLayout->addWidget(_vgui, 0, 0);
     mainLayout->addWidget(_maxspeedSlider, 0, 1); 
-    mainLayout->addWidget(_startStreamButton, 1, 0); 
-    mainLayout->addWidget(_stopStreamButton, 2, 0); 
+    mainLayout->addWidget(_frequencyShiftCheck, 1, 0); 
+    mainLayout->addWidget(_startStreamButton, 2, 0); 
+    mainLayout->addWidget(_stopStreamButton, 3, 0); 
+
 
     setLayout(mainLayout); 
     setWindowTitle("Audio Control Panel");
@@ -61,6 +68,11 @@ void AudioGUI::stopStreamClicked()
 void AudioGUI::updateMaxspeed()
 {
     cout << "Max speed = " << getMaxspeed() << endl;
+}
+
+void AudioGUI::toggleFrequencyShift()
+{
+    _eng->toggleFrequencyShift(); 
 }
 
 
@@ -199,14 +211,20 @@ QString VisualGUI::helpString() const
 
 void VisualGUI::computeMouseSpeed(const QMouseEvent * const e)
 {
-    const QPoint delta = (e->pos() - _prevPos);
-    _prevPos = e->pos(); 
+    QPoint mousePos = e->pos();
+    const QPoint delta = (mousePos - _prevPos);
+    _prevPos = mousePos; 
     const float dist = sqrt(static_cast<float>(delta.x()*delta.x() + delta.y()*delta.y()));
     _delay = _lastMoveTime.restart();
+    //cout << "refresh rate = " << 1.0/_delay*1000 << endl; 
     if (_delay == 0) // Less than a millisecond: assume delay = 1ms
         _mouseSpeed = dist;
     else
         _mouseSpeed = dist/_delay;
+
+    /* set the mouse speed to zero if inside bufferzone */
+    if (((width()-mousePos.x())<PARAMETERS::BUFFERZONE) || ((height()-mousePos.y())<PARAMETERS::BUFFERZONE) || mousePos.x() < PARAMETERS::BUFFERZONE || mousePos.y() < PARAMETERS::BUFFERZONE)
+        _mouseSpeed = 0.0;
 }
 
 void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
@@ -216,6 +234,8 @@ void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
         computeMouseSpeed(e); 
     else 
         _mouseSpeed = 0.0;
+
+
 
     _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
     //cout << "mouse speed = " << _mouseSpeed << endl;

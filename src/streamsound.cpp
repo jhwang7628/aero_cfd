@@ -9,7 +9,9 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
                                                             _thisSF(_allSF.begin()),
                                                             _timeStamp(0), 
                                                             _globalAbsMax(0.0), 
-                                                            _extraScaling(1.0)
+                                                            _extraScaling(1.0), 
+                                                            _frequencyShift(true)
+
     {
         _data = new stereo(); 
 
@@ -61,16 +63,12 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 void MyPortaudioClass::timeStep(int dt)
 {
 
-#ifdef UPSAMPLE_RATIO
-    int incre = (int)(UPSAMPLE_RATIO*_extraScaling); 
-    incre = fmax(incre, 12); 
-    incre = fmin(incre, 12);
-    _timeStamp += dt*UPSAMPLE_RATIO;
-    //if (incre != 0)
-    //    printf("_extraScaling = %f, incre = %i, _timeStamp = %i\n",_extraScaling, incre, _timeStamp);
-#else 
-    _timeStamp += dt; 
-#endif
+    int incre = (int)(PARAMETERS::UPSAMPLE_RATIO*_extraScaling); 
+
+    if (_frequencyShift)
+        _timeStamp += dt*incre;
+    else 
+        _timeStamp += dt*PARAMETERS::UPSAMPLE_RATIO;
 
     if (_timeStamp >= (*_thisSF)->maxTimeStep)
         _timeStamp = _timeStamp - (*_thisSF)->maxTimeStep; 
@@ -90,6 +88,20 @@ void MyPortaudioClass::computePhase()
     //_data->right_phase = (_data->gx + _data->gy + _data->gz)/_globalAbsMax/_extraScaling; 
     _data->right_phase = _data->left_phase; 
 }
+
+inline void MyPortaudioClass::toggleFrequencyShift()
+{
+    _frequencyShift = ! _frequencyShift;
+}
+
+inline bool MyPortaudioClass::getFrequencyShift()
+{
+    return _frequencyShift;
+}
+
+
+
+/////////////////////////////////////////////////////////
 
 void Engine::InitStream()
 {
@@ -178,4 +190,10 @@ void Engine::addSF(const SourceFunction * sf)
 
     _allSF.push_back(sf); 
 
+}
+
+void Engine::toggleFrequencyShift()
+{
+    _mypa->toggleFrequencyShift(); 
+    cout << "Frequency Shift: " << _mypa->getFrequencyShift() << endl;
 }
