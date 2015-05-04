@@ -209,9 +209,14 @@ QString VisualGUI::helpString() const
 }
 #endif 
 
-void VisualGUI::computeMouseSpeed(const QMouseEvent * const e)
+void VisualGUI::computeMouseSpeed(QMouseEvent* const e)
 {
+
+    //QPoint mousePos = this->mapFromGlobal(QCursor::pos());
     QPoint mousePos = e->pos();
+    //cout << "p = " << p.x() << ", " << p.y() << endl;
+    //cout << "mousePos = " << mousePos.x() << ", " << mousePos.y() << endl;
+
     const QPoint delta = (mousePos - _prevPos);
     _prevPos = mousePos; 
     const float dist = sqrt(static_cast<float>(delta.x()*delta.x() + delta.y()*delta.y()));
@@ -240,10 +245,16 @@ void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
     else 
         _mouseSpeed = 0.0;
 
-    _eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
+    //_eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
 
     //cout << "mouse speed = " << _mouseSpeed << endl;
 
+}
+
+
+void Engine::computeMouseSpeed()
+{
+    //_vgui->computeMouseSpeed();
 }
 
 

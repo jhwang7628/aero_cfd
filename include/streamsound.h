@@ -41,9 +41,14 @@ class MyPortaudioClass
     int _timeStamp;
     double _globalAbsMax; 
     double _extraScaling; 
+    double _prevScale; 
+    double _currScale;
     bool _frequencyShift;
 
     public : 
+
+
+    FILE*fp; 
 
     MyPortaudioClass(vector<const SourceFunction*> allSF);
 
@@ -123,14 +128,14 @@ class Engine
     void toggleFrequencyShift(); 
 
     void setGUIs(AudioGUI * agui, VisualGUI * vgui); 
-    
+    void computeMouseSpeed();
+
 
 }; 
 
 /* Store some useful sndstate parameters */
 class sndState
 {
-
     public : 
         static double currMouseSpeed; 
         static double prevMouseSpeed;

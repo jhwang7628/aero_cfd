@@ -42,7 +42,7 @@ class VisualGUI : public QGLViewer
             _agui = agui; 
         }
 
-        void computeMouseSpeed(const QMouseEvent * const e); 
+        void computeMouseSpeed(QMouseEvent* const e); 
 
 
 };

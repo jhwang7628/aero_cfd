@@ -1,5 +1,6 @@
 #include "sourcefunction.h"
 #include "parameters.h"
+#include <stdio.h>
 
 SourceFunction::SourceFunction(const double bs, const SHAPE s, const Eigen::MatrixXd * g) : _baseSpeed(bs), 
             _shape(s), 
@@ -42,11 +43,21 @@ Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const
             if (ii+1 == g->rows()) 
                 nextTS = 0; // wrap-around
 
-            gProcessed->row(jj) = g->row(thisTS)*(1.0-alpha) + g->row(nextTS)*alpha;  // linterp
+            gProcessed->row(jj) = g->row(thisTS)*(1.0-alpha) + g->row(nextTS)*alpha;
 
             count += 1.0; 
         }
     }
+
+    FILE* fp = fopen("out/ginterpolated.txt", "w"); 
+    for (int ii=0; ii<gProcessed->rows(); ii++)
+    {
+        fprintf(fp,"%.12f %.12f %.12f\n", (*gProcessed)(ii,0),
+                                          (*gProcessed)(ii,1), 
+                                          (*gProcessed)(ii,2)); 
+    }
+    fclose(fp);
+
 
 
 

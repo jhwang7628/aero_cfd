@@ -10,10 +10,14 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
                                                             _timeStamp(0), 
                                                             _globalAbsMax(0.0), 
                                                             _extraScaling(1.0), 
-                                                            _frequencyShift(true)
+                                                            _prevScale(1.0),
+                                                            _currScale(1.0), 
+                                                            _frequencyShift(false)
 
     {
         _data = new stereo(); 
+
+        fp = fopen("out/log.txt", "w");
 
         //syncSF(); 
         computeGlobalMax();
@@ -26,6 +30,8 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
                                        PaStreamCallbackFlags statusFlags)
 {
 
+    //cout << frameCount << endl;
+
     float *out = (float*) output; 
 
 
@@ -33,43 +39,80 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) statusFlags; 
     (void) input; 
 
-    unsigned int ii; 
 
-
-    /* make sure the mouse speed is frozen. */
-    double prevScale = sndState::prevMouseSpeed/15.0;
-    double currScale = sndState::currMouseSpeed/15.0;
+    /* make sure the mouse speed is frozen between every callback. */
+    _prevScale = _currScale;
+    _currScale = sndState::currMouseSpeed/4.0;
     double alpha; 
     double scale; //blended scales
 
+
+    double tmp1;
+    double left_phaseInc = 0.2;
+    double right_phaseInc = 0.6;
+
+    double left_phase = _data->left_phase;
+    double right_phase = _data->right_phase;
+
+    double outTime = timeInfo->outputBufferDacTime;
+
+    //data->outTime = timeInfo->outputBufferDacTime;
+
+    const double TWOPI = 6.28318; 
+    int i;
+
+
+    unsigned int ii; 
+
     for (ii=0; ii<frameCount; ii++) 
     {
-        alpha = ii/frameCount; 
-        scale = (1.0 - alpha)*prevScale + alpha*currScale; 
-
-        *out++ = (float) _data->left_phase; 
-        *out++ = (float) _data->right_phase; 
-
-        /* compute the phase */
-        //_data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*_extraScaling; 
-        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*scale; 
-        _data->right_phase = _data->left_phase; 
-
-        /* time step the signal */
-        int incre = (int)(PARAMETERS::UPSAMPLE_RATIO*_extraScaling); 
-
-        if (_frequencyShift)
-            _timeStamp += incre;
-        else 
-            _timeStamp += PARAMETERS::UPSAMPLE_RATIO;
-
-        _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+        alpha = (double)(ii)/(double)(frameCount); 
+        scale = (1.0 - alpha)*_prevScale + alpha*_currScale; 
+        //fprintf(fp, "%.12f %i\n", scale, (int)(ii==0)); 
 
         _data->gx = (*_thisSF)->getgx(_timeStamp); 
         _data->gy = (*_thisSF)->getgy(_timeStamp); 
         _data->gz = (*_thisSF)->getgz(_timeStamp); 
 
+        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(scale,1.0); 
+        _data->right_phase = _data->left_phase; 
+
+        /* time step the signal */
+        int incre = (int)(PARAMETERS::UPSAMPLE_RATIO*scale); 
+
+        if (_frequencyShift)
+        {
+            _timeStamp += incre;
+        }
+        else 
+        {
+            _timeStamp += PARAMETERS::UPSAMPLE_RATIO;
+        }
+
+        if (_timeStamp >= (*_thisSF)->maxTimeStep)
+        {
+            //cout << "restart" << endl;
+            _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+        }
+
+
+        *out++ = (float) _data->left_phase; 
+        *out++ = (float) _data->right_phase; 
+
+          
+          
+          
+          
+        //left_phase += left_phaseInc;
+        //if( left_phase > TWOPI ) left_phase -= TWOPI;
+        //*out++ = (float) (sin( left_phase ) * scale * 0.1);
+
+        //right_phase += right_phaseInc;
+        //if( right_phase > TWOPI ) right_phase -= TWOPI;
+        //*out++ = (float) (sin( right_phase ) * scale * 0.1);
     }
+
+
       
     return paContinue;
 }
@@ -128,8 +171,9 @@ void Engine::OpenStream()
                &_stream,
                NULL, /* no input */
                &_outputParameters,
-               10000, /* SAMPLE_RATE, */ 
-               paFramesPerBufferUnspecified, /* FRAMES_PER_BUFFER, */
+               20000, /* SAMPLE_RATE, */ 
+               //paFramesPerBufferUnspecified, /* FRAMES_PER_BUFFER, */
+               200, /* FRAMES_PER_BUFFER, */
                paClipOff,      /* we won't output out of range samples so don't bother clipping them */
                &(MyPortaudioClass::myPaCallback),
                (void*) _mypa);
