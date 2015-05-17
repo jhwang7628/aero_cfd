@@ -8,9 +8,32 @@
 
 using namespace std;
 
+Particles::Particles()
+{
+    init(); 
+}
+
+int Particles::ageMax = 10;
+
+void Particles::init()
+{
+    _pos.setZero(); 
+    _age = 0.0; 
+}
+
+void Particles::draw()
+{
+    glColor3f(_age/(float)ageMax, _age/(float)ageMax, 1.0); 
+    glVertex3f((float)_pos(0),(float)_pos(1),(float)_pos(2)); 
+}
+
+void Particles::animate()
+{
+    draw(); 
+}
 
 
-AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(parent), _eng(eng), _vgui(vgui)
+AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(parent), _useLeapMotion(false), _eng(eng), _vgui(vgui)
 {
     /* gain two-way communication */
     vgui->set_agui(this); 
@@ -18,33 +41,57 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
     /* to be exception-safe. */
     _startStreamButton = new AudioStreamButton("Start stream", this); 
     _stopStreamButton  = new AudioStreamButton("Stop stream", this); 
-    _maxspeedSlider = new QSlider(Qt::Vertical, this); 
+    _sensitivitySlider = new QSlider(Qt::Vertical, this); 
+    _sharpnessSlider = new QSlider(Qt::Vertical, this); 
     _frequencyShiftCheck = new QCheckBox("Frequency shift", this); 
+    _useLeapMotionCheck = new QCheckBox("Use Leap Motion", this); 
+
+    _sensitivitySliderMsg = new QLabel("5");
+    _sharpnessSliderMsg = new QLabel("2");
+    _sensitivitySliderLabel = new QLabel("Sensitivity"); 
+    _sharpnessSliderLabel = new QLabel("Amp Mag");
 
     connect(_startStreamButton, SIGNAL(clicked()), 
             this, SLOT(startStreamClicked())); 
     connect(_stopStreamButton, SIGNAL(clicked()), 
             this, SLOT(stopStreamClicked())); 
-    connect(_maxspeedSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(updateMaxspeed()));
+    connect(_sensitivitySlider, SIGNAL(valueChanged(int)),
+            this, SLOT(updateSensitivity()));
+    connect(_sharpnessSlider, SIGNAL(valueChanged(int)), 
+            this, SLOT(updateSharpness()));
     connect(_frequencyShiftCheck, SIGNAL(stateChanged(int)), 
             this, SLOT(toggleFrequencyShift())); 
+    connect(_useLeapMotionCheck, SIGNAL(stateChanged(int)), 
+            this, SLOT(toggleUseLeapMotion())); 
 
-    _maxspeedSlider->setRange(10, 30); 
-    _maxspeedSlider->setValue(30); 
-    _maxspeedSlider->setPageStep(1);
+    _sensitivitySlider->setRange(30, 100); 
+    _sensitivitySlider->setValue(50); 
+    _sensitivitySlider->setPageStep(1);
+
+    _sharpnessSlider->setRange(10, 30); 
+    _sharpnessSlider->setValue(10); 
+    _sharpnessSlider->setPageStep(1);
+
 
     /* set button layout */
 
     QGridLayout *mainLayout = new QGridLayout; 
 
     mainLayout->addWidget(_vgui, 0, 0);
-    mainLayout->addWidget(_maxspeedSlider, 0, 1); 
+    mainLayout->addWidget(_sensitivitySlider, 0, 1); 
+    mainLayout->addWidget(_sensitivitySliderMsg, 1, 1); 
+    mainLayout->addWidget(_sensitivitySliderLabel, 2, 1); 
+    mainLayout->addWidget(_sharpnessSlider, 0, 2); 
+    mainLayout->addWidget(_sharpnessSliderMsg, 1, 2); 
+    mainLayout->addWidget(_sharpnessSliderLabel, 2, 2); 
+
     mainLayout->addWidget(_frequencyShiftCheck, 1, 0); 
-    mainLayout->addWidget(_startStreamButton, 2, 0); 
-    mainLayout->addWidget(_stopStreamButton, 3, 0); 
+    mainLayout->addWidget(_useLeapMotionCheck, 2, 0);
+    mainLayout->addWidget(_startStreamButton, 3, 0); 
+    mainLayout->addWidget(_stopStreamButton, 4, 0); 
 
 
+    //mainLayout->setAlignment(Qt::AlignCenter);
     setLayout(mainLayout); 
     setWindowTitle("Audio Control Panel");
     resize(800, 600); 
@@ -65,14 +112,29 @@ void AudioGUI::stopStreamClicked()
     _eng->StopStream();
 }
 
-void AudioGUI::updateMaxspeed()
-{
-    cout << "Max speed = " << getMaxspeed() << endl;
-}
+//void AudioGUI::updateMaxspeed()
+//{
+//    //cout << "Max speed = " << getMaxspeed() << endl;
+//}
 
 void AudioGUI::toggleFrequencyShift()
 {
     _eng->toggleFrequencyShift(); 
+}
+
+void AudioGUI::toggleUseLeapMotion()
+{
+    _useLeapMotion = ! _useLeapMotion; 
+    cout << "Use Leap Motion for velocity tracking = " << _useLeapMotion << endl; 
+
+    if (_useLeapMotion) 
+        _leapmotion = new LeapMotion(); 
+    else 
+    {
+        if (_leapmotion != NULL)
+            delete _leapmotion; 
+    }
+
 }
 
 
@@ -82,74 +144,80 @@ AudioStreamButton::AudioStreamButton(const QString &text, QWidget *parent) : QPu
 }
 
 
-
-
-
-// Draws a spiral
 void VisualGUI::draw()
 {
-#if 0
 
-
-    /* testing */
-    const float nbSteps = 80.0;
-
-    glBegin(GL_QUAD_STRIP);
-    for (float i=0; i<nbSteps; ++i)
+    if (NULL != _agui->_leapmotion && _agui->_leapmotion->gotFirstFrame())
     {
-        float ratio = i/nbSteps;
-        float angle = 21.0*ratio;
-        float c = cos(angle);
-        float s = sin(angle);
-        float r1 = 1.0 - 0.8*ratio;
-        float r2 = 0.8 - 0.8*ratio;
-        float alt = ratio - 0.5;
-        const float nor = .5;
-        const float up = sqrt(1.0-nor*nor);
-        glColor3f(fabs(c), 0.2f, fabs(s));
-        glNormal3f(nor*c, up, nor*s);
-        glVertex3f(r1*c, alt, r1*s);
-        glVertex3f(r2*c, alt+0.05, r2*s);
+        Eigen::MatrixXd * tmp = new Eigen::MatrixXd(); 
+        tmp->setZero(3,1); 
+        _agui->_leapmotion->getIndexFingerPos(tmp); 
+
+        if ((*tmp) != _plist[_lastPart].getPos())
+        {
+            for (int ii=0; ii<Particles::ageMax; ii++)
+                _plist[ii].growOld(); 
+            
+            _plist[_lastPart].init();
+            _plist[_lastPart].setPos((Eigen::Vector3d) (*tmp));
+            _lastPart ++; 
+            _lastPart = _lastPart == Particles::ageMax ? 0 : _lastPart;
+        }
+
+        glBegin(GL_POINTS); 
+        for (int ii=0; ii<Particles::ageMax; ii++)
+        {
+            _plist[ii].draw(); 
+        }
+        glEnd(); 
+
+        //cout << " drawing " << endl;
+        //Eigen::MatrixXd * tmp = new Eigen::MatrixXd(); 
+        //tmp->setZero(3,1); 
+        //_agui->_leapmotion->getIndexFingerPos(tmp); 
+
+        //glBegin(GL_POINTS);
+        //glColor3f(1.0f,1.0f,1.0f); 
+        //glVertex3f((float)(*tmp)(0),(float)(*tmp)(1),(float)(*tmp)(2)); 
+        //glEnd(); 
     }
-    glEnd();
-#endif
+
 }
 
 void VisualGUI::init()
 {
     // Restore previous viewer state.
     restoreStateFromFile();
+    glPointSize(6.0);
+    setAnimationPeriod(0.0);
+
+    _nbPart = Particles::ageMax; 
+
+    _plist = new Particles[_nbPart]; 
+    _lastPart = 0; 
+
+    for (int ii=0; ii<Particles::ageMax; ii++)
+    {
+        Eigen::MatrixXd * tmp = new Eigen::MatrixXd(3,1); 
+        tmp->setZero(); 
+        _plist[ii].growOld();
+    }
+
 
     // set mouse tracking
     setMouseTracking(true); 
+    setGridIsDrawn(); 
+
+    startAnimation();
 
     // Set 'Control+F' as the FPS toggle state key.
     setShortcut(DISPLAY_FPS, Qt::CTRL+Qt::Key_F);
 
-    // Disable draw grid toggle shortcut (default was 'G')
-    //setShortcut(DRAW_GRID, 0);
+}
 
-
-
-
-    /////////////////////////////////////////////////////
-    //         Mouse bindings customization            //
-    //     Changes standard action mouse bindings      //
-    /////////////////////////////////////////////////////
-
-    // Left and right buttons together make a camera zoom : emulates a mouse third button if needed.
-    //setMouseBinding(Qt::Key_Z, Qt::NoModifier, Qt::LeftButton, CAMERA, ZOOM);
-
-    //// Disable previous TRANSLATE mouse binding (and remove it from help mouse tab).
-    //setMouseBinding(Qt::NoModifier, Qt::RightButton, NO_CLICK_ACTION);
-
-    //setMouseBinding(Qt::ControlModifier | Qt::ShiftModifier, Qt::RightButton, SELECT);
-    //setWheelBinding(Qt::AltModifier, CAMERA, MOVE_FORWARD);
-    //setMouseBinding(Qt::AltModifier, Qt::LeftButton, CAMERA, TRANSLATE);
-
-    //// Add custom mouse bindings description (see mousePressEvent())
-    //setMouseBindingDescription(Qt::NoModifier, Qt::RightButton, "Opens a camera path context menu");
-
+void VisualGUI::animate()
+{
+    //draw(); 
 }
 
 
@@ -189,26 +257,6 @@ void VisualGUI::keyPressEvent(QKeyEvent *e)
         QGLViewer::keyPressEvent(e);
 }
 
-
-
-#if 0
-QString VisualGUI::helpString() const
-{
-    QString text("<h2>K e y b o a r d A n d M o u s e</h2>");
-    text += "This example illustrates the mouse and key bindings customization.<br><br>";
-    text += "Use <code>setShortcut()</code> to change standard action key bindings (display of axis, grid or fps, exit shortcut...).<br><br>";
-    text += "Use <code>setMouseBinding()</code> and <code>setWheelBinding()</code> to change standard action mouse bindings ";
-    text += "(camera rotation, translation, object selection...).<br><br>";
-    text += "If you want to define <b>new</b> key or mouse actions, overload <code>keyPressEvent()</code> and/or ";
-    text += "<code>mouse(Press|Move|Release)Event()</code> to define and bind your own new actions. ";
-    text += "Use <code>setKeyDescription()</code> and <code>setMouseBindingDescription()</code> to add a description of your bindings in the help window.<br><br>";
-    text += "In this example, we defined the <b>F</b> and <b>W</b> keys and the right mouse button opens a popup menu. ";
-    text += "See the keyboard and mouse tabs in this help window for the complete bindings description.<br><br>";
-    text += "By the way, exit shortcut has been binded to <b>Ctrl+Q</b>.";
-    return text;
-}
-#endif 
-
 void VisualGUI::computeMouseSpeed(QMouseEvent* const e)
 {
 
@@ -232,9 +280,20 @@ void VisualGUI::computeMouseSpeed(QMouseEvent* const e)
     sndState::prevMouseSpeed = _prevMouseSpeed; 
     sndState::currMouseSpeed = _mouseSpeed;
 
+    //cout << "speed_mouse = " << _mouseSpeed << endl;
+
     /* set the mouse speed to zero if inside bufferzone */
     if (((width()-mousePos.x())<PARAMETERS::BUFFERZONE) || ((height()-mousePos.y())<PARAMETERS::BUFFERZONE) || mousePos.x() < PARAMETERS::BUFFERZONE || mousePos.y() < PARAMETERS::BUFFERZONE)
         _mouseSpeed = 0.0;
+}
+
+void VisualGUI:: updateCamera()
+{
+    myCamera._camera = this->camera(); 
+    qglviewer::Vec tmpPos = myCamera._camera->position(); 
+    myCamera._position[0] = tmpPos.x;
+    myCamera._position[1] = tmpPos.y; 
+    myCamera._position[2] = tmpPos.z; 
 }
 
 void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
@@ -244,10 +303,6 @@ void VisualGUI::mouseMoveEvent(QMouseEvent* const e)
         computeMouseSpeed(e); 
     else 
         _mouseSpeed = 0.0;
-
-    //_eng->setExtraScaling(_mouseSpeed/(_agui->getMaxspeed()*0.5)); 
-
-    //cout << "mouse speed = " << _mouseSpeed << endl;
 
 }
 

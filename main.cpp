@@ -16,6 +16,7 @@
 #include "readsound.h"
 #include "sourcefunction.h"
 #include "streamsound.h"
+#include "LeapMotion.h"
 
 #include "IO/IO.h"
 

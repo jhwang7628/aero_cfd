@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "setup the dylib path for using leap motion"
+
+install_name_tool -change @loader_path/libLeap.dylib /Users/jui-hsienwang/LeapMotion/LeapDeveloperKit_2.2.5+26752_mac/LeapSDK/lib/libLeap.dylib ./dobashi.app/Contents/MacOS/dobashi

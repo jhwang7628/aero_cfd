@@ -83,7 +83,7 @@ static const uint qt_meta_data_AudioGUI[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       4,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -94,15 +94,18 @@ static const uint qt_meta_data_AudioGUI[] = {
        9,   30,   30,   30, 0x08,
       31,   30,   30,   30, 0x08,
       51,   30,   30,   30, 0x08,
-      68,   30,   30,   30, 0x08,
+      74,   30,   30,   30, 0x08,
+      96,   30,   30,   30, 0x08,
+     116,   30,   30,   30, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_AudioGUI[] = {
     "AudioGUI\0startStreamClicked()\0\0"
-    "stopStreamClicked()\0updateMaxspeed()\0"
-    "toggleFrequencyShift()\0"
+    "stopStreamClicked()\0toggleFrequencyShift()\0"
+    "toggleUseLeapMotion()\0updateSensitivity()\0"
+    "updateSharpness()\0"
 };
 
 void AudioGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -113,8 +116,10 @@ void AudioGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         switch (_id) {
         case 0: _t->startStreamClicked(); break;
         case 1: _t->stopStreamClicked(); break;
-        case 2: _t->updateMaxspeed(); break;
-        case 3: _t->toggleFrequencyShift(); break;
+        case 2: _t->toggleFrequencyShift(); break;
+        case 3: _t->toggleUseLeapMotion(); break;
+        case 4: _t->updateSensitivity(); break;
+        case 5: _t->updateSharpness(); break;
         default: ;
         }
     }
@@ -153,9 +158,9 @@ int AudioGUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 4)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 4;
+        _id -= 6;
     }
     return _id;
 }

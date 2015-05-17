@@ -129,6 +129,8 @@ class Engine
 
     void setGUIs(AudioGUI * agui, VisualGUI * vgui); 
     void computeMouseSpeed();
+    double getSensitivity(); 
+    double getSharpness(); 
 
 
 }; 
@@ -139,6 +141,7 @@ class sndState
     public : 
         static double currMouseSpeed; 
         static double prevMouseSpeed;
+
 
 }; 
 

@@ -1,0 +1,10 @@
+\begin{thebibliography}{\protect\citename{Dobashi et~al\mbox{.} }2003}
+
+\bibitem[\protect\citename{Dobashi et~al\mbox{.} }2003]{dobashi2003}
+{\sc Dobashi, Y., Yamamoto, T., and Nishita, T.}
+\newblock 2003.
+\newblock Real-time rendering of aerodynamic sound using sound textures based
+  on computational fluid dynamics.
+\newblock {\em ACM Trans. on Graphics (Proc. SIGGRAPH) 22}, 3.
+
+\end{thebibliography}
