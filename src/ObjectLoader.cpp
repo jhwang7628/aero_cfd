@@ -17,6 +17,26 @@ void ObjectLoader::loadCylinder(Engine & eng)
     eng.addSF(sf); 
 }
 
+void ObjectLoader::loadCylinderv30(Engine & eng) 
+{
+    string filename = string("./sound/cylinder/g_2Dcylinder_v30.dat"); 
+    
+    Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
+    IO::readMatrixXd(*sound, filename.c_str(), BINARY); 
+    SourceFunction * sf = new SourceFunction(10, cylinder, sound, 0);
+    eng.addSF(sf); 
+}
+
+void ObjectLoader::loadCylinderv45(Engine & eng) 
+{
+    string filename = string("./sound/cylinder/g_2Dcylinder_v45.dat"); 
+    
+    Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
+    IO::readMatrixXd(*sound, filename.c_str(), BINARY); 
+    SourceFunction * sf = new SourceFunction(10, cylinder, sound, 0);
+    eng.addSF(sf); 
+}
+
 void ObjectLoader::loadCylinderRepeat(Engine & eng)
 {
     for (int ii=0; ii<=9; ii++)

@@ -1,3 +1,5 @@
+WRITE=1
+
 listing = dir('*.handData'); 
 listing = {listing.name}; 
 
@@ -12,7 +14,7 @@ palmNor = zeros(numel(listing), 3);
 count = 0; 
 
 N_discret = 10; 
-l = linspace(0,1,N_discret); 
+l = linspace(-0.3,0.7,N_discret); 
 scale = 3;% random scaling
 
 for ii=1:numel(listing) 
@@ -28,7 +30,7 @@ for ii=1:numel(listing)
     tipSpd(ii)  = norm(tipVel(ii,:)); 
 
 
-    if 1 % save particle positions
+    if WRITE % save particle positions
         particles = zeros(N_discret, 3); 
        
         fpath = sprintf('%.5u.particles', count); 
@@ -36,7 +38,7 @@ for ii=1:numel(listing)
         fprintf(fp, '%u\n', N_discret); 
 
         for jj=1:N_discret
-            particles(jj,:) = tipPos(ii,:) + 1*handDir(ii,:)*l(jj); 
+            particles(jj,:) = tipPos(ii,:) + handDir(ii,:)*l(jj); 
             fprintf(fp, '%.12f %.12f %.12f\n', particles(jj,1), particles(jj,2), particles(jj,3)); 
         end
 

@@ -35,9 +35,13 @@ int main(int argc, char ** argv) {
     cout  << "project starts!" << endl; 
 
     Engine eng; 
+    eng.ReadHandDataFromDrive("/Users/jui-hsienwang/Cornell/Dobashi/out/frames/test2"); 
+    //ObjectLoader::loadCylinder(eng);
+    //ObjectLoader::loadCylinderv30(eng); 
+    //ObjectLoader::loadCylinderv45(eng); 
     //ObjectLoader::loadCylinderRepeat(eng);
-    //ObjectLoader::loadSword(eng);
     ObjectLoader::loadSquare(eng);
+    //ObjectLoader::loadSword(eng);
 
     cout << "Initialzing audio streaming.. " << endl; 
     eng.InitStream(); 

@@ -19,10 +19,11 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
 {
     _data = new stereo(); 
 
-    fp = fopen("out/log.txt", "w");
+    fp = fopen("out/log_square.txt", "w");
 
     //syncSF(); 
     computeGlobalMax();
+
     //printf("MyPortaudioClass instantiated. left_phase = %f, right_phase = %f\n", _data->left_phase, _data->right_phase); 
     //printf("how many source function do I have now? %lu\n", _allSF.size()); 
 }
@@ -41,36 +42,59 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) input; 
 
 
-
-
-    if (1)
+    if (0)
     {
         double time = timeInfo->outputBufferDacTime; 
-        printf("Exporting frame at time = %f\n", time);
+        //printf("Exporting frame at time = %u\n", FrameExporter::frame);
         FrameExporter::writeMotionCaptureData(sndState::handData, time); 
+        FrameExporter::frame ++;
+        return paContinue;
     }
 
-
-    /* Copy the hand data */
-    if (sndState::handData.tipVel.norm() == handData.tipVel.norm())
-        curRepeatNumBuffer ++; 
-    else 
-        curRepeatNumBuffer = 0; 
-
-    if (curRepeatNumBuffer > PARAMETERS::maxRepeatNumBuffer)
+    /* data was read from hard drive. */
+    if ( PARAMETERS::READ_MOCAP_FROM_DRIVE ) 
     {
-        for (int ii=0; ii<frameCount; ii++) 
-        {
-            *out++ = 0.0f; 
-            *out++ = 0.0f;  
+        handData = (_eng->allHandDataFromDrive)[FrameExporter::frame]; 
+        handData.tipVel = handData.tipVel / 1000.0*3.0; 
+        handData.tipPos = handData.tipPos / 1000.0*3.0; 
+        //cout << "handData.tipVel[0] = " << (handData.tipVel)[0] << endl;;
 
+        FrameExporter::frame ++; 
+        if (FrameExporter::frame >= _eng->allHandDataFromDrive.size() )
+        {
+            FrameExporter::frame = FrameExporter::frame % (_eng->allHandDataFromDrive.size());
+            return paComplete; 
         }
-        return paContinue; 
+
+        //FrameExporter::frame = FrameExporter::frame % _eng->allHandDataFromDrive.size();  // wrap around to repeat the simulation
+
+        sndState::prevMouseSpeed = sndState::currMouseSpeed;
+        sndState::currMouseSpeed = handData.tipVel.norm(); 
+        //sndState::currMouseSpeed = handData.tipVel.norm()/1000*3.0; 
+        sndState::handData = handData; 
+    }
+    else 
+    {
+        /* Copy the hand data */
+        if (sndState::handData.tipVel.norm() == handData.tipVel.norm())
+            curRepeatNumBuffer ++; 
+        else 
+            curRepeatNumBuffer = 0; 
+
+        if (curRepeatNumBuffer > PARAMETERS::maxRepeatNumBuffer)
+        {
+            for (int ii=0; ii<frameCount; ii++) 
+            {
+                *out++ = 0.0f; 
+                *out++ = 0.0f;  
+
+            }
+            return paContinue; 
+        }
+
+        handData = sndState::handData; 
     }
 
-
-
-    handData = sndState::handData; 
 
 
     Eigen::Vector3d wind_ref = handData.R_w2o * (-handData.tipVel);
@@ -91,8 +115,6 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 
     //printf("texture # %u is used\n", (*_thisSF)->getTextureIndex()); 
 
-    _thisSF = _allSF.begin() + textureIndex;
-
     //printf("sound source function # %u is used\n", textureIndex);
 
 
@@ -101,15 +123,52 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     _prevScale = _currScale;
     //_currScale = sndState::currMouseSpeed/4.0;
     _currScale = sndState::currMouseSpeed/_eng->getSensitivity();
-    double alpha; 
+    double alpha, alpha2; 
     double scale; //blended scales
     double sharpness = _eng->getSharpness(); 
 
     unsigned int ii; 
 
-    for (ii=0; ii<frameCount; ii++) 
+    /* Intertextual blending by sacrificing part of the new sound*/
+    int subBuffer = frameCount / 10; 
+    _data->gx = (*_thisSF)->getgx(_timeStamp); 
+    _data->gy = (*_thisSF)->getgy(_timeStamp); 
+    _data->gz = (*_thisSF)->getgz(_timeStamp); 
+    double lastSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
+
+    int incre = round((double)PARAMETERS::UPSAMPLE_RATIO*1.0); 
+
+    if (_frequencyShift)
+        _timeStamp += incre*subBuffer;
+    else 
+        _timeStamp += PARAMETERS::UPSAMPLE_RATIO*subBuffer;
+
+    //_timeStamp += subBuffer; 
+    _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+
+    _thisSF = _allSF.begin() + textureIndex;
+
+    _data->gx = (*_thisSF)->getgx(_timeStamp); 
+    _data->gy = (*_thisSF)->getgy(_timeStamp); 
+    _data->gz = (*_thisSF)->getgz(_timeStamp); 
+    double currSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
+
+    for (ii=0; ii<subBuffer; ii++) 
     {
-        alpha = (double)(ii)/(double)(frameCount); 
+        alpha2 = (double)(ii)/(double)(subBuffer); 
+        
+        _data->left_phase = (1.0 - alpha2) * lastSound + alpha2 * currSound; 
+        _data->right_phase = _data->left_phase; 
+
+        fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
+
+        *out++ = (float) _data->left_phase; 
+        *out++ = (float) _data->right_phase; 
+    }
+
+    for (ii=subBuffer; ii<frameCount; ii++) 
+    {
+        alpha = (double)(ii)/(double)(frameCount - subBuffer); 
         scale = (1.0 - alpha)*_prevScale + alpha*_currScale; 
 
         _data->gx = (*_thisSF)->getgx(_timeStamp); 
@@ -130,7 +189,7 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 
         _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
 
-        fprintf(fp, "%.12f %.12f\n", sndState::currMouseSpeed, _data->left_phase); 
+        fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
 
         *out++ = (float) _data->left_phase; 
         *out++ = (float) _data->right_phase; 
@@ -154,6 +213,14 @@ inline bool MyPortaudioClass::getFrequencyShift()
 }
 
 
+void Engine::ReadHandDataFromDrive(const char * indir)
+{
+
+    //FrameExporter frameExporter; 
+
+    FrameExporter::readAllMotionCaptureData(allHandDataFromDrive, indir); 
+
+}
 
 /////////////////////////////////////////////////////////
 
@@ -249,6 +316,7 @@ void Engine::StartStream()
 void Engine::StopStream()
 {
     cout << " - Stop stream. " << endl; 
+    fclose(_mypa->fp);
     if (NULL != _stream && _streamStarted) 
         _err = Pa_StopStream(_stream);
 

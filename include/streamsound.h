@@ -53,6 +53,7 @@ class MyPortaudioClass
     public : 
 
 
+
     FILE*fp; 
 
     MyPortaudioClass(vector<const SourceFunction*> allSF);
@@ -91,6 +92,7 @@ class MyPortaudioClass
     }
 
 
+
 };
 
 class VisualGUI; 
@@ -113,29 +115,31 @@ class Engine
 
     public : 
 
-    Engine() : _stream(NULL), 
-               _mypa(NULL), 
-               _streamStarted(false) { } 
+        vector<HandData> allHandDataFromDrive; 
+        
+        Engine() : _stream(NULL), 
+                   _mypa(NULL), 
+                   _streamStarted(false) { } 
 
-    ~Engine() {}
+        ~Engine() {}
 
+        void InitStream(); 
+        void OpenStream(); 
+        void StartStream(); 
+        void StopStream();
+        void CloseStream(); 
 
+        void setExtraScaling(const double scale);
+        void addSF(const SourceFunction * sf);
 
-    void InitStream(); 
-    void OpenStream(); 
-    void StartStream(); 
-    void StopStream();
-    void CloseStream(); 
+        void toggleFrequencyShift(); 
 
-    void setExtraScaling(const double scale);
-    void addSF(const SourceFunction * sf);
+        void setGUIs(AudioGUI * agui, VisualGUI * vgui); 
+        void computeMouseSpeed();
+        double getSensitivity(); 
+        double getSharpness(); 
 
-    void toggleFrequencyShift(); 
-
-    void setGUIs(AudioGUI * agui, VisualGUI * vgui); 
-    void computeMouseSpeed();
-    double getSensitivity(); 
-    double getSharpness(); 
+        void ReadHandDataFromDrive(const char * indir);
 
 
 }; 

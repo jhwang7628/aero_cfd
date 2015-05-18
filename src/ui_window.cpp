@@ -65,11 +65,11 @@ AudioGUI::AudioGUI(Engine * eng, VisualGUI * vgui, QWidget *parent) : QWidget(pa
             this, SLOT(toggleUseLeapMotion())); 
 
     _sensitivitySlider->setRange(30, 100); 
-    _sensitivitySlider->setValue(50); 
+    _sensitivitySlider->setValue(55); 
     _sensitivitySlider->setPageStep(1);
 
-    _sharpnessSlider->setRange(10, 30); 
-    _sharpnessSlider->setValue(10); 
+    _sharpnessSlider->setRange(10, 60); 
+    _sharpnessSlider->setValue(25); 
     _sharpnessSlider->setPageStep(1);
 
 
@@ -127,13 +127,21 @@ void AudioGUI::toggleUseLeapMotion()
     _useLeapMotion = ! _useLeapMotion; 
     cout << "Use Leap Motion for velocity tracking = " << _useLeapMotion << endl; 
 
+    /* not do anything if motion capture is read from drive */
+    if ( PARAMETERS::READ_MOCAP_FROM_DRIVE ) 
+        _useLeapMotion = false; 
+
+
     if (_useLeapMotion) 
+    {
         _leapmotion = new LeapMotion(); 
+    }
     else 
     {
         if (_leapmotion != NULL)
             delete _leapmotion; 
     }
+
 
 }
 
@@ -206,6 +214,54 @@ void VisualGUI::draw()
         //glColor3f(1.0f,1.0f,1.0f); 
         //glVertex3f((float)(*tmp)(0),(float)(*tmp)(1),(float)(*tmp)(2)); 
         //glEnd(); 
+    }
+    else 
+    {
+        if ( PARAMETERS::READ_MOCAP_FROM_DRIVE )
+        {
+
+            if (sndState::handData.tipPos != _plist[_lastPart].getPos())
+            {
+                for (int ii=0; ii<Particles::ageMax; ii++)
+                    _plist[ii].growOld(); 
+                
+                _plist[_lastPart].init();
+                _plist[_lastPart].setPos(sndState::handData.tipPos);
+                _lastPart ++; 
+                _lastPart = _lastPart == Particles::ageMax ? 0 : _lastPart;
+            }
+
+            glBegin(GL_POINTS); 
+            for (int ii=0; ii<Particles::ageMax; ii++)
+            {
+                _plist[ii].draw(); 
+            }
+            glEnd(); 
+
+
+            glColor3f(1.0f,0.0f,0.0f); 
+            glLineWidth(4.0);
+            glBegin(GL_LINES);
+            Eigen::Vector3d pos = _plist[_lastPart].getPos(); 
+            glVertex3f((float)pos[0],
+                       (float)pos[1],
+                       (float)pos[2]);
+
+            glVertex3f((float)0.25*sndState::handData.handDir[0],
+                       (float)0.25*sndState::handData.handDir[1],
+                       (float)0.25*sndState::handData.handDir[2]);
+            glEnd(); 
+
+            glColor3f(0.0f,1.0f,0.0f); 
+            glBegin(GL_LINES);
+            glVertex3f((float)pos[0],
+                       (float)pos[1],
+                       (float)pos[2]);
+            glVertex3f((float)0.25*sndState::handData.palmNor[0],
+                       (float)0.25*sndState::handData.palmNor[1],
+                       (float)0.25*sndState::handData.palmNor[2]);
+            glEnd(); 
+        }
     }
 
 }

@@ -60,6 +60,8 @@ Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const
         }
     }
 
+    printf("The source source function was upsampled by a factor of %u\n", PARAMETERS::UPSAMPLE_RATIO); 
+
     FILE* fp = fopen("out/ginterpolated.txt", "w"); 
     for (int ii=0; ii<gProcessed->rows(); ii++)
     {
