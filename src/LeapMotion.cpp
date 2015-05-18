@@ -37,9 +37,32 @@ void LeapListener::onFrame(const Controller& controller) {
         _lm->setGotFirstFrame(true); 
 
     HandList hands = frame.hands();
-    for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl) {
+    for (HandList::const_iterator hl = hands.begin(); hl != hands.end(); ++hl) 
+    {
         // Get the first hand
         const Hand hand = *hl;
+
+        Leap::Vector tmpHandDir = hand.direction(); 
+        Leap::Vector tmpPalmDir = hand.palmNormal(); 
+
+        _lm->handData.handDir[0] = tmpHandDir.x; 
+        _lm->handData.handDir[1] = tmpHandDir.y; 
+        _lm->handData.handDir[2] = tmpHandDir.z; 
+
+        _lm->handData.palmNor[0] = tmpPalmDir.x; 
+        _lm->handData.palmNor[1] = tmpPalmDir.y; 
+        _lm->handData.palmNor[2] = tmpPalmDir.z; 
+
+        Eigen::Vector3d tmp = _lm->handData.handDir.cross(_lm->handData.palmNor); 
+        tmp.normalize();
+        Eigen::Matrix3d R_w2o; 
+        R_w2o.col(0) = _lm->handData.palmNor; 
+        R_w2o.col(1) = tmp; 
+        R_w2o.col(2) = _lm->handData.handDir; 
+
+        R_w2o.transposeInPlace(); 
+
+        _lm->handData.R_w2o = R_w2o; 
 
         // Get fingers
         const FingerList fingers = hand.fingers();
@@ -49,7 +72,7 @@ void LeapListener::onFrame(const Controller& controller) {
             /* Only tracking the index finger */
             if (finger.type() == 1) 
             {
-                cout << "index finger : pos, vel = " << finger.tipPosition() << ", " << finger.tipVelocity() << endl;
+                //cout << "index finger : pos, vel = " << finger.tipPosition() << ", " << finger.tipVelocity() << endl;
                 _lm->setIndexFingerState(finger.tipPosition(), finger.tipVelocity()); 
                 Eigen::MatrixXd *vel = new Eigen::MatrixXd(); 
                 vel->setZero(3,1); 
@@ -57,8 +80,25 @@ void LeapListener::onFrame(const Controller& controller) {
 
                 double speed = vel->norm();
 
+
+                Leap::Vector tmpTipPos = finger.tipPosition(); 
+                Leap::Vector tmpTipVel = finger.tipVelocity(); 
+
+                _lm->handData.tipPos[0] = tmpTipPos.x; 
+                _lm->handData.tipPos[1] = tmpTipPos.y; 
+                _lm->handData.tipPos[2] = tmpTipPos.z; 
+
+                _lm->handData.tipVel[0] = tmpTipVel.x; 
+                _lm->handData.tipVel[1] = tmpTipVel.y; 
+                _lm->handData.tipVel[2] = tmpTipVel.z; 
+
                 sndState::prevMouseSpeed = sndState::currMouseSpeed;
                 sndState::currMouseSpeed = speed*3.0; 
+
+
+
+
+
 
                 //cout << "speed = " << speed << endl; 
 
@@ -67,9 +107,6 @@ void LeapListener::onFrame(const Controller& controller) {
 
         }
     }
-
-    if (!frame.hands().isEmpty()) 
-        std::cout << std::endl;
 }
 
 void LeapListener::onFocusGained(const Controller& controller) {
@@ -160,6 +197,12 @@ void LeapMotion::setGotFirstFrame(const bool g)
 bool LeapMotion::gotFirstFrame()
 {
     return _gotFirstFrame; 
+}
+
+
+void LeapMotion::updateHandData() 
+{
+    sndState::handData = handData;
 }
 
 

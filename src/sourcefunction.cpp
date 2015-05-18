@@ -2,18 +2,29 @@
 #include "parameters.h"
 #include <stdio.h>
 
-SourceFunction::SourceFunction(const double bs, const SHAPE s, const Eigen::MatrixXd * g) : _baseSpeed(bs), 
+SourceFunction::SourceFunction(const double bs, const SHAPE s, const Eigen::MatrixXd * g, const int textureIndex) : _baseSpeed(bs), 
             _shape(s), 
             _g(postProcessG(g)), 
+            _textureIndex(textureIndex),
             maxTimeStep(_g->rows())
 {
     cout << "New source function initialized for shape "; 
-    switch (_shape)
-    {
-        case cylinder : printf("\"%s\"\n", getShapeName());
-                        break;
-    }
+    printf("\"%s\"\n", getShapeName());
 
+    //switch (_shape)
+    //{
+    //    case cylinder : printf("\"%s\"\n", getShapeName());
+    //                    break;
+
+    //    case square : printf("\"%s\"\n", getShapeName());
+    //                    break;
+
+    //    case sword_aniso : printf("\"%s\"\n", getShapeName());
+    //                    break;
+    //                    
+    //}
+
+    cout << "textureIndex = " << textureIndex << endl;
     cout << "maxTimeStep = " << maxTimeStep << endl;
     computeLocalAbsMax();
 }
@@ -75,6 +86,8 @@ const char * SourceFunction::getShapeName() const
     switch (_shape) 
     {
         case cylinder : return "2D cylinder"; break;
+        case square : return "2D square"; break;
+        case sword_aniso : return "2D sword (anisotropic)"; break;
     }
 
     return NULL;

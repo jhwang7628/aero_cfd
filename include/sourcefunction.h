@@ -6,13 +6,14 @@
 
 using namespace std; 
 
-enum SHAPE { cylinder };
+enum SHAPE { cylinder, square, sword_aniso };
 
 class SourceFunction
 {
     const double _baseSpeed; 
     const SHAPE _shape; 
-    const Eigen::MatrixXd * _g; 
+    const Eigen::MatrixXd * _g;  // N-by-3 matrix
+    const int _textureIndex;  // identify which texture is this
 
     double _localAbsMax; 
 
@@ -20,7 +21,7 @@ class SourceFunction
 
     const int maxTimeStep; 
         
-    SourceFunction(const double bs, const SHAPE s, const Eigen::MatrixXd * g); 
+    SourceFunction(const double bs, const SHAPE s, const Eigen::MatrixXd * g, const int textureIndex); 
 
     ~SourceFunction(); 
 
@@ -28,6 +29,11 @@ class SourceFunction
     double getBaseSpeed() const
     {
         return _baseSpeed; 
+    }
+
+    int getTextureIndex() const 
+    {
+        return _textureIndex; 
     }
 
     Eigen::MatrixXd * postProcessG(const Eigen::MatrixXd * g) const;

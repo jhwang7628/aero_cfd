@@ -12,6 +12,7 @@
 #include "portaudio.h"
 #include "pa_util.h"
 #include "sourcefunction.h"
+#include "LeapMotion.h"
 
 using namespace std; 
 
@@ -44,6 +45,10 @@ class MyPortaudioClass
     double _prevScale; 
     double _currScale;
     bool _frequencyShift;
+
+    HandData handData; 
+
+    int curRepeatNumBuffer;
 
     public : 
 
@@ -141,7 +146,7 @@ class sndState
     public : 
         static double currMouseSpeed; 
         static double prevMouseSpeed;
-
+        static HandData handData; 
 
 }; 
 

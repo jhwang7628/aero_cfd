@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <iostream>
 
+#include <string>
+#include <sstream>
+
 #include <Eigen/Dense>
 
 #include <sndfile.h>
@@ -17,8 +20,10 @@
 #include "sourcefunction.h"
 #include "streamsound.h"
 #include "LeapMotion.h"
+#include "ObjectLoader.h"
 
 #include "IO/IO.h"
+#include "auxFunc.h"
 
 
 #define MAX_BUFFER_DOUBLE (500000)
@@ -29,13 +34,10 @@ int main(int argc, char ** argv) {
 
     cout  << "project starts!" << endl; 
 
-    Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
-    //SoundReader::wavreader("./sound/test.wav", 20000, sound); 
-    IO::readMatrixXd(*sound, "./sound/g.dat", BINARY); 
-
-    SourceFunction * sf = new SourceFunction(10, cylinder, sound);
     Engine eng; 
-    eng.addSF(sf); 
+    //ObjectLoader::loadCylinderRepeat(eng);
+    //ObjectLoader::loadSword(eng);
+    ObjectLoader::loadSquare(eng);
 
     cout << "Initialzing audio streaming.. " << endl; 
     eng.InitStream(); 

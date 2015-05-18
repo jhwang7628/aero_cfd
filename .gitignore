@@ -1,5 +1,8 @@
 *.o 
+*.swp
 dobashi
 dobashi.app
 .qglviewer.xml
 out
+movie
+

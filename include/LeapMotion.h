@@ -9,6 +9,16 @@
 using namespace std; 
 using namespace Leap; 
 
+struct HandData
+{
+    Eigen::Vector3d tipPos; 
+    Eigen::Vector3d tipVel;  
+    Eigen::Vector3d handDir; 
+    Eigen::Vector3d palmNor; 
+
+    Eigen::Matrix3d R_w2o; // rotation matrix from world to object space
+}; 
+
 
 class LeapMotion; 
 class LeapListener : public Listener
@@ -43,6 +53,7 @@ class LeapMotion
         Leap::Vector * _indexFingerPos; 
         Leap::Vector * _indexFingerVel; 
 
+
         bool _gotFirstFrame;
 
     public: 
@@ -55,6 +66,10 @@ class LeapMotion
         void getIndexFingerVel(Eigen::MatrixXd * vel);
         void setGotFirstFrame(const bool g); 
         bool gotFirstFrame();
+
+        void updateHandData(); 
+
+        HandData handData; 
 
 }; 
 

@@ -147,11 +147,13 @@ AudioStreamButton::AudioStreamButton(const QString &text, QWidget *parent) : QPu
 void VisualGUI::draw()
 {
 
+    /* Draw leap motion */
     if (NULL != _agui->_leapmotion && _agui->_leapmotion->gotFirstFrame())
     {
         Eigen::MatrixXd * tmp = new Eigen::MatrixXd(); 
         tmp->setZero(3,1); 
         _agui->_leapmotion->getIndexFingerPos(tmp); 
+        _agui->_leapmotion->updateHandData(); 
 
         if ((*tmp) != _plist[_lastPart].getPos())
         {
@@ -169,6 +171,30 @@ void VisualGUI::draw()
         {
             _plist[ii].draw(); 
         }
+        glEnd(); 
+
+
+        glColor3f(1.0f,0.0f,0.0f); 
+        glLineWidth(4.0);
+        glBegin(GL_LINES);
+        Eigen::Vector3d pos = _plist[_lastPart].getPos(); 
+        glVertex3f((float)pos[0],
+                   (float)pos[1],
+                   (float)pos[2]);
+
+        glVertex3f((float)0.25*sndState::handData.handDir[0],
+                   (float)0.25*sndState::handData.handDir[1],
+                   (float)0.25*sndState::handData.handDir[2]);
+        glEnd(); 
+
+        glColor3f(0.0f,1.0f,0.0f); 
+        glBegin(GL_LINES);
+        glVertex3f((float)pos[0],
+                   (float)pos[1],
+                   (float)pos[2]);
+        glVertex3f((float)0.25*sndState::handData.palmNor[0],
+                   (float)0.25*sndState::handData.palmNor[1],
+                   (float)0.25*sndState::handData.palmNor[2]);
         glEnd(); 
 
         //cout << " drawing " << endl;

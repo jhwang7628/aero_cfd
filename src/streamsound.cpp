@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cmath>
 #include "parameters.h"
+#include "ObjectLoader.h"
+#include "FrameExporter.h"
 
 using namespace std; 
 
@@ -14,16 +16,18 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
                                                             _currScale(1.0), 
                                                             _frequencyShift(false)
 
-    {
-        _data = new stereo(); 
+{
+    _data = new stereo(); 
 
-        fp = fopen("out/log.txt", "w");
+    fp = fopen("out/log.txt", "w");
 
-        //syncSF(); 
-        computeGlobalMax();
-        //printf("MyPortaudioClass instantiated. left_phase = %f, right_phase = %f\n", _data->left_phase, _data->right_phase); 
-        //printf("how many source function do I have now? %lu\n", _allSF.size()); 
-    }
+    //syncSF(); 
+    computeGlobalMax();
+    //printf("MyPortaudioClass instantiated. left_phase = %f, right_phase = %f\n", _data->left_phase, _data->right_phase); 
+    //printf("how many source function do I have now? %lu\n", _allSF.size()); 
+}
+
+
 int MyPortaudioClass::myMemberCallback(const void *input, void *output,
                                        unsigned long frameCount,
                                        const PaStreamCallbackTimeInfo* timeInfo,
@@ -36,7 +40,64 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) statusFlags; 
     (void) input; 
 
+
+
+
+    if (1)
+    {
+        double time = timeInfo->outputBufferDacTime; 
+        printf("Exporting frame at time = %f\n", time);
+        FrameExporter::writeMotionCaptureData(sndState::handData, time); 
+    }
+
+
+    /* Copy the hand data */
+    if (sndState::handData.tipVel.norm() == handData.tipVel.norm())
+        curRepeatNumBuffer ++; 
+    else 
+        curRepeatNumBuffer = 0; 
+
+    if (curRepeatNumBuffer > PARAMETERS::maxRepeatNumBuffer)
+    {
+        for (int ii=0; ii<frameCount; ii++) 
+        {
+            *out++ = 0.0f; 
+            *out++ = 0.0f;  
+
+        }
+        return paContinue; 
+    }
+
+
+
+    handData = sndState::handData; 
+
+
+    Eigen::Vector3d wind_ref = handData.R_w2o * (-handData.tipVel);
+    wind_ref.normalize();
+    wind_ref[1] = 0.0; // project it to 2D plane.
+
+    // compute nearest sound state
+    double theta;
+    if (wind_ref.norm() > 1E-14)
+        theta = acos(wind_ref[0] / wind_ref.norm()); // 
+    else // probably haven't got any mocap data
+        theta = 0.0; 
+
+    //int interval = ((theta*180.0/3.14159) % (*_thisSF)->wrapAngle) / (*_thisSF)->sampleAngle; 
+    //
+    int wrapAngle = _allSF.size() * ObjectLoader::sampleInterval;
+    int textureIndex =  ( (int)floor(theta*180.0/3.14159) % wrapAngle ) / ObjectLoader::sampleInterval;
+
+    //printf("texture # %u is used\n", (*_thisSF)->getTextureIndex()); 
+
+    _thisSF = _allSF.begin() + textureIndex;
+
+    //printf("sound source function # %u is used\n", textureIndex);
+
+
     /* make sure the mouse speed is frozen between every callback. */
+
     _prevScale = _currScale;
     //_currScale = sndState::currMouseSpeed/4.0;
     _currScale = sndState::currMouseSpeed/_eng->getSensitivity();
@@ -249,3 +310,6 @@ double Engine::getSharpness()
   
 double sndState::currMouseSpeed = 0.0; 
 double sndState::prevMouseSpeed = 0.0; 
+HandData sndState::handData;
+
+
