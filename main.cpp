@@ -35,43 +35,30 @@ int main(int argc, char ** argv) {
     cout  << "project starts!" << endl; 
 
     Engine eng; 
-    eng.ReadHandDataFromDrive("/Users/jui-hsienwang/Cornell/Dobashi/out/frames/test2"); 
-    //ObjectLoader::loadCylinder(eng);
+
+    /* 
+     * Load the motion capture data,
+     * different loader modules can be uncommented.
+     * */
+    eng.ReadHandDataFromDrive("mocap_data/sequence1"); 
+    ObjectLoader::loadCylinder(eng);
     //ObjectLoader::loadCylinderv30(eng); 
     //ObjectLoader::loadCylinderv45(eng); 
     //ObjectLoader::loadCylinderRepeat(eng);
-    ObjectLoader::loadSquare(eng);
+    //ObjectLoader::loadSquare(eng);
     //ObjectLoader::loadSword(eng);
+    //ObjectLoader::loadSwordAniso(eng);
 
     cout << "Initialzing audio streaming.. " << endl; 
     eng.InitStream(); 
     eng.OpenStream(); 
-    //eng.StartStream(); 
-
-    //sleep(50);
-    //eng.StopStream(); 
-    //eng.CloseStream(); 
-
 
     QApplication application(argc,argv);
     VisualGUI vgui(&eng); 
     AudioGUI  agui(&eng,&vgui); 
     eng.setGUIs(&agui, &vgui);
 
-    //gui.show();
-
-    //eng.setQA(&application);
-    //eng.setUI();
-
-    //Viewer viewer;
-
-    //viewer.setWindowTitle("keyboardAndMouse");
-
-    //viewer.show();
-
 
     return application.exec();
-
-    // create opengl window to do swinging test based on mouse movement
 
 }

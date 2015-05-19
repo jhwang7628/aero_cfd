@@ -11,19 +11,6 @@ SourceFunction::SourceFunction(const double bs, const SHAPE s, const Eigen::Matr
     cout << "New source function initialized for shape "; 
     printf("\"%s\"\n", getShapeName());
 
-    //switch (_shape)
-    //{
-    //    case cylinder : printf("\"%s\"\n", getShapeName());
-    //                    break;
-
-    //    case square : printf("\"%s\"\n", getShapeName());
-    //                    break;
-
-    //    case sword_aniso : printf("\"%s\"\n", getShapeName());
-    //                    break;
-    //                    
-    //}
-
     cout << "textureIndex = " << textureIndex << endl;
     cout << "maxTimeStep = " << maxTimeStep << endl;
     computeLocalAbsMax();
@@ -70,13 +57,6 @@ Eigen::MatrixXd * SourceFunction::postProcessG(const Eigen::MatrixXd *g) const
                                           (*gProcessed)(ii,2)); 
     }
     fclose(fp);
-
-
-
-
-
-
-
 
     return gProcessed; 
 

@@ -1,4 +1,4 @@
-WRITE=1
+WRITE=0
 
 listing = dir('*.handData'); 
 listing = {listing.name}; 
@@ -56,14 +56,18 @@ t = linspace(0, 0.01*numel(listing), numel(listing));
 figure, 
 subplot(3,1,1)
 plot(t, tipSpd); 
-title('Scaled Tip Speed (m/s)'); 
+ylabel('Scaled Tip Speed (m/s)'); 
+axis tight
 
 subplot(3,1,2)
 plot(t, handDir); 
-title('Hand Direction');
+legend('x','y','z');
+ylabel('Hand Direction');
 
 subplot(3,1,3)
 plot(t, palmNor); 
-title('Palm Normal');
+legend('x','y','z');
+ylabel('Palm Normal');
+xlabel('Time (s)');
 
 

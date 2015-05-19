@@ -17,39 +17,81 @@
 \citation{dobashi2003}
 \citation{dobashi2003}
 \citation{curle, howe2002}
-\citation{curle}
+\citation{bridson_book}
+\citation{zheng2009}
+\citation{vandenDoel2005}
+\citation{moss2010}
+\citation{obrien2002,vandenDoel2001}
+\citation{chadwick2009}
+\citation{zheng2010,chadwick2012}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The vortex shedding pattern of flow over a 2D sword determines its dipole characteristics and the aerodynamic sound when swung by, say, a virtual samurai.\relax }}{1}{figure.1}}
 \@LN@col{1}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
 \@LN@col{2}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{1}{section.2}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Curle's Model}{1}{section.3}}
-\newlabel{section:curle}{{3}{1}{Curle's Model\relax }{section.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Sound Texture Database Construction}{1}{section.4}}
-\newlabel{section:sound_texture}{{4}{1}{Sound Texture Database Construction\relax }{section.4}{}}
+\citation{chadwick2011}
+\citation{an2012}
+\citation{rodet1992}
+\citation{serra1990}
+\citation{verronphd}
+\citation{vandenDoel2001}
+\citation{curle}
 \@LN@col{1}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Curle's Model}{2}{section.3}}
+\newlabel{section:curle}{{3}{2}{Curle's Model\relax }{section.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Sound Texture Database Construction}{2}{section.4}}
+\newlabel{section:sound_texture}{{4}{2}{Sound Texture Database Construction\relax }{section.4}{}}
+\@LN@col{2}
 \newlabel{eq:incidence}{{3}{2}{Sound Texture Database Construction\relax }{equation.4.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Runtime Considerations}{2}{section.5}}
 \newlabel{section:runtime}{{5}{2}{Runtime Considerations\relax }{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Real-time motion capture}{2}{subsection.5.1}}
 \@writefile{toc}{\contentsline {paragraph}{Using mouse cursor}{2}{section*.2}}
 \@writefile{toc}{\contentsline {paragraph}{Using Leap Motion}{2}{section*.3}}
-\@LN@col{2}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Leap Motion sensor: (a) The system use IR sensors to detect the motion and gestures of the hand. The raw IR images can be used for debugging; (b) The system features a 150 degree FOV, making it a good candidate for our swinging motion; (c) The orientation of the object can be uniquely determined by transforming the wind vector into the coordinate system defined by the direction of the hand and the palm normal.\relax }}{2}{figure.caption.4}}
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:leapmotion}{{2}{2}{Leap Motion sensor: (a) The system use IR sensors to detect the motion and gestures of the hand. The raw IR images can be used for debugging; (b) The system features a 150 degree FOV, making it a good candidate for our swinging motion; (c) The orientation of the object can be uniquely determined by transforming the wind vector into the coordinate system defined by the direction of the hand and the palm normal.\relax \relax }{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The wind direction, determined by the swinging motion, is first transformed into the object space, and then projected onto the plane of the cross-section. This vector, $\mathbf  {w}^{o}_{\delimiter "026B30D }$, is then quantized into a texture index for this object to fetch the sound database, which is preloaded when the program starts.\relax }}{2}{figure.caption.5}}
-\newlabel{fig:transform}{{3}{2}{The wind direction, determined by the swinging motion, is first transformed into the object space, and then projected onto the plane of the cross-section. This vector, $\mathbf {w}^{o}_{\|}$, is then quantized into a texture index for this object to fetch the sound database, which is preloaded when the program starts.\relax \relax }{figure.caption.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Clicking noise and audio underrun}{2}{subsection.5.2}}
-\bibstyle{acmsiggraph}
-\bibdata{reference}
-\bibcite{dobashi2003}{\citename {Dobashi et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2003}
 \@LN@col{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Leap Motion sensor: (a) The system use IR sensors to detect the motion and gestures of the hand. The raw IR images can be used for debugging; (b) The system features a 150 degree FOV, making it a good candidate for our swinging motion; (c) The orientation of the object can be uniquely determined by transforming the wind vector into the coordinate system defined by the direction of the hand and the palm normal.\relax }}{3}{figure.caption.4}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:leapmotion}{{2}{3}{Leap Motion sensor: (a) The system use IR sensors to detect the motion and gestures of the hand. The raw IR images can be used for debugging; (b) The system features a 150 degree FOV, making it a good candidate for our swinging motion; (c) The orientation of the object can be uniquely determined by transforming the wind vector into the coordinate system defined by the direction of the hand and the palm normal.\relax \relax }{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The wind direction, determined by the swinging motion, is first transformed into the object space, and then projected onto the plane of the cross-section. This vector, $\mathbf  {w}^{o}_{\delimiter "026B30D }$, is then quantized into a texture index for this object to fetch the sound database, which is preloaded when the program starts.\relax }}{3}{figure.caption.5}}
+\newlabel{fig:transform}{{3}{3}{The wind direction, determined by the swinging motion, is first transformed into the object space, and then projected onto the plane of the cross-section. This vector, $\mathbf {w}^{o}_{\|}$, is then quantized into a texture index for this object to fetch the sound database, which is preloaded when the program starts.\relax \relax }{figure.caption.5}{}}
+\@LN@col{2}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Result}{3}{section.6}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Implementation Details}{3}{subsection.6.1}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}2D cylinder}{3}{subsection.6.2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}2D square}{3}{subsection.6.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}2D, anisotropic sword}{3}{subsection.6.4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Cross-section of the geometry used in the precomputation.\relax }}{3}{figure.caption.6}}
+\newlabel{fig:simulation_geometry}{{4}{3}{Cross-section of the geometry used in the precomputation.\relax \relax }{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}UI design}{3}{subsection.6.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces UI for the real-time control.\relax }}{3}{figure.caption.8}}
+\newlabel{fig:UI}{{5}{3}{UI for the real-time control.\relax \relax }{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Motion capture data}{3}{subsection.6.3}}
+\bibstyle{acmsiggraph}
+\bibdata{reference}
+\bibcite{bridson_book}{\citename {Bridson }2008}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Precomputation statistics.\relax }}{4}{table.caption.7}}
+\newlabel{table:runstats}{{1}{4}{Precomputation statistics.\relax \relax }{table.caption.7}{}}
+\@LN@col{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Example of motion capture data. Tip speed is scaled because my finger is too short to produce any interesting sound. X: point to my right when facing the computer monitor; Y: up direction; Z: towards me.\relax }}{4}{figure.caption.9}}
+\newlabel{fig:mocap}{{6}{4}{Example of motion capture data. Tip speed is scaled because my finger is too short to produce any interesting sound. X: point to my right when facing the computer monitor; Y: up direction; Z: towards me.\relax \relax }{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}2D cylinder}{4}{subsection.6.4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces The frequency scaling for cylinder introduced in Section \ref  {section:sound_texture} is validated by running ``redundant'' speed sampling.\relax }}{4}{figure.caption.10}}
+\newlabel{fig:frequency_scaling}{{7}{4}{The frequency scaling for cylinder introduced in Section \ref {section:sound_texture} is validated by running ``redundant'' speed sampling.\relax \relax }{figure.caption.10}{}}
 \@LN@col{2}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Precomputation statistics.\relax }}{4}{table.caption.6}}
-\newlabel{table:runstats}{{1}{4}{Precomputation statistics.\relax \relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}2D square}{4}{subsection.6.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}2D sword}{4}{subsection.6.6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.7}2D anisotropic sword}{4}{subsection.6.7}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Limitation}{4}{section.7}}
+\bibcite{chadwick2011}{\citename {Chadwick and James }2011}
+\bibcite{chadwick2009}{\citename {Chadwick et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2009}
+\bibcite{chadwick2012}{\citename {Chadwick et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2012}
+\bibcite{dobashi2003}{\citename {Dobashi et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2003}
+\bibcite{vandenDoel2005}{\citename {Doel }2005}
+\bibcite{moss2010}{\citename {Moss et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2010}
+\bibcite{obrien2002}{\citename {O'Brien et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2002}
+\bibcite{serra1990}{\citename {Serra and Smith }1990}
+\bibcite{an2012}{\citename {Steven S.\nobreakspace  {}An and Marschner }2012}
+\bibcite{vandenDoel2001}{\citename {van\nobreakspace  {}den Doel et\nobreakspace  {}al\unhbox \voidb@x \hbox {.} }2001}
+\bibcite{verronphd}{\citename {Verron }2010}
+\bibcite{zheng2009}{\citename {Zheng and James }2009}
+\bibcite{zheng2010}{\citename {Zheng and James }2010}
+\@LN@col{1}
+\@LN@col{2}

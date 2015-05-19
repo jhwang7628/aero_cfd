@@ -81,8 +81,8 @@ void FrameExporter::writeMotionCaptureData(const HandData & handData, const doub
 double FrameExporter::readMotionCaptureData(const char * filename, HandData & handData)
 {
 
-    printf("---\n"); 
-    printf("HandData read from %s: \n", filename); 
+    //printf("---\n"); 
+    //printf("HandData read from %s: \n", filename); 
 
     ifstream infile(filename); 
 
@@ -98,7 +98,6 @@ double FrameExporter::readMotionCaptureData(const char * filename, HandData & ha
 
     {
         getline(infile, line); 
-        cout << line << endl;
         istringstream iss(line); 
         iss >> time; 
     }

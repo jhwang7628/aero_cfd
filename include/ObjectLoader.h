@@ -3,8 +3,9 @@
 
 #include "streamsound.h"
 
-
-
+/* 
+ * Helper class for loading different geometries
+ */
 class ObjectLoader
 {
 
@@ -18,6 +19,7 @@ class ObjectLoader
         static void loadCylinderRepeat(Engine & eng); 
         static void loadSquare(Engine & eng); 
         static void loadSword(Engine & eng);
+        static void loadSwordAniso(Engine & eng);
 }; 
 
 

@@ -19,7 +19,7 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
 {
     _data = new stereo(); 
 
-    fp = fopen("out/log_square.txt", "w");
+    fp = fopen("out/log_anisosword.txt", "w");
 
     //syncSF(); 
     computeGlobalMax();
@@ -42,10 +42,10 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) input; 
 
 
-    if (0)
+    if ( PARAMETERS::SAVE_MOCAP_TO_DRIVE )
     {
         double time = timeInfo->outputBufferDacTime; 
-        //printf("Exporting frame at time = %u\n", FrameExporter::frame);
+        printf("Exporting frame at time = %u\n", FrameExporter::frame);
         FrameExporter::writeMotionCaptureData(sndState::handData, time); 
         FrameExporter::frame ++;
         return paContinue;
@@ -57,7 +57,6 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
         handData = (_eng->allHandDataFromDrive)[FrameExporter::frame]; 
         handData.tipVel = handData.tipVel / 1000.0*3.0; 
         handData.tipPos = handData.tipPos / 1000.0*3.0; 
-        //cout << "handData.tipVel[0] = " << (handData.tipVel)[0] << endl;;
 
         FrameExporter::frame ++; 
         if (FrameExporter::frame >= _eng->allHandDataFromDrive.size() )
@@ -66,11 +65,8 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
             return paComplete; 
         }
 
-        //FrameExporter::frame = FrameExporter::frame % _eng->allHandDataFromDrive.size();  // wrap around to repeat the simulation
-
         sndState::prevMouseSpeed = sndState::currMouseSpeed;
         sndState::currMouseSpeed = handData.tipVel.norm(); 
-        //sndState::currMouseSpeed = handData.tipVel.norm()/1000*3.0; 
         sndState::handData = handData; 
     }
     else 
@@ -108,20 +104,12 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     else // probably haven't got any mocap data
         theta = 0.0; 
 
-    //int interval = ((theta*180.0/3.14159) % (*_thisSF)->wrapAngle) / (*_thisSF)->sampleAngle; 
-    //
     int wrapAngle = _allSF.size() * ObjectLoader::sampleInterval;
     int textureIndex =  ( (int)floor(theta*180.0/3.14159) % wrapAngle ) / ObjectLoader::sampleInterval;
 
-    //printf("texture # %u is used\n", (*_thisSF)->getTextureIndex()); 
-
-    //printf("sound source function # %u is used\n", textureIndex);
-
 
     /* make sure the mouse speed is frozen between every callback. */
-
     _prevScale = _currScale;
-    //_currScale = sndState::currMouseSpeed/4.0;
     _currScale = sndState::currMouseSpeed/_eng->getSensitivity();
     double alpha, alpha2; 
     double scale; //blended scales
@@ -143,7 +131,6 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     else 
         _timeStamp += PARAMETERS::UPSAMPLE_RATIO*subBuffer;
 
-    //_timeStamp += subBuffer; 
     _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
 
     _thisSF = _allSF.begin() + textureIndex;
@@ -166,6 +153,7 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
         *out++ = (float) _data->right_phase; 
     }
 
+    /* Amplitude/freqeuncy scaling */
     for (ii=subBuffer; ii<frameCount; ii++) 
     {
         alpha = (double)(ii)/(double)(frameCount - subBuffer); 
@@ -189,7 +177,7 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
 
         _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
 
-        fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
+        //fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
 
         *out++ = (float) _data->left_phase; 
         *out++ = (float) _data->right_phase; 
@@ -215,11 +203,7 @@ inline bool MyPortaudioClass::getFrequencyShift()
 
 void Engine::ReadHandDataFromDrive(const char * indir)
 {
-
-    //FrameExporter frameExporter; 
-
     FrameExporter::readAllMotionCaptureData(allHandDataFromDrive, indir); 
-
 }
 
 /////////////////////////////////////////////////////////
@@ -375,9 +359,7 @@ double Engine::getSharpness()
 ///////////////////////////////////////////////////
   
   
-  
 double sndState::currMouseSpeed = 0.0; 
 double sndState::prevMouseSpeed = 0.0; 
 HandData sndState::handData;
-
 

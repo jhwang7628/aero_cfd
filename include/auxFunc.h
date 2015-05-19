@@ -5,6 +5,9 @@
 #include <iostream>
 #include <sstream>
 
+/* 
+ * to_string method c++11 
+ */
 template <typename T>
 std::string to_string(T value)
 {

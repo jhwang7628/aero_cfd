@@ -17,8 +17,6 @@ class SoundReader
          */
         static Eigen::MatrixXd * wavreader(const char * wavfile, int BUFFERSIZE, Eigen::MatrixXd * soundout)
         {
-            //char wavfile[] = "./sound/test.wav"; 
-
             printf("Reading wav files : %s\n", wavfile); 
             // read wav files 
             struct SF_INFO *mysf = new SF_INFO(); 

@@ -1,10 +1,95 @@
-\begin{thebibliography}{\protect\citename{Dobashi et~al\mbox{.} }2003}
+\begin{thebibliography}{\protect\citename{Steven S.~An and Marschner }2012}
+
+\bibitem[\protect\citename{Bridson }2008]{bridson_book}
+{\sc Bridson, R.}
+\newblock 2008.
+\newblock {\em Fluid Simulation for Computer Graphics}.
+\newblock A K Peters, Ltd.
+
+\bibitem[\protect\citename{Chadwick and James }2011]{chadwick2011}
+{\sc Chadwick, J.~N., and James, D.~L.}
+\newblock 2011.
+\newblock Animating fire with sound.
+\newblock {\em ACM Transactions on Graphics 30}, 4 (Aug.).
+
+\bibitem[\protect\citename{Chadwick et~al\mbox{.} }2009]{chadwick2009}
+{\sc Chadwick, J.~N., An, S.~S., and James, D.~L.}
+\newblock 2009.
+\newblock Harmonic shells: A practical nonlinear sound model for near-rigid
+  thin shells.
+\newblock {\em ACM Transactions on Graphics\/} (Aug.).
+
+\bibitem[\protect\citename{Chadwick et~al\mbox{.} }2012]{chadwick2012}
+{\sc Chadwick, J.~N., Zheng, C., and James, D.~L.}
+\newblock 2012.
+\newblock Faster acceleration noise for multibody animations using precomputed
+  soundbanks.
+\newblock {\em ACM/Eurographics Symposium on Computer Animation\/}.
 
 \bibitem[\protect\citename{Dobashi et~al\mbox{.} }2003]{dobashi2003}
 {\sc Dobashi, Y., Yamamoto, T., and Nishita, T.}
 \newblock 2003.
 \newblock Real-time rendering of aerodynamic sound using sound textures based
   on computational fluid dynamics.
-\newblock {\em ACM Trans. on Graphics (Proc. SIGGRAPH) 22}, 3.
+\newblock {\em ACM Transactions on Graphics 22}, 3 (July), 732.
+
+\bibitem[\protect\citename{Doel }2005]{vandenDoel2005}
+{\sc Doel, K. v.~d.}
+\newblock 2005.
+\newblock Physically based models for liquid sounds.
+\newblock {\em ACM Trans. Appl. Percept. 2}, 4 (Oct.), 534--546.
+
+\bibitem[\protect\citename{Moss et~al\mbox{.} }2010]{moss2010}
+{\sc Moss, W., Yeh, H., Hong, J.-M., Lin, M.~C., and Manocha, D.}
+\newblock 2010.
+\newblock Sounding liquids: Automatic sound synthesis from fluid simulation.
+\newblock {\em ACM Trans. Graph. 29}, 3.
+
+\bibitem[\protect\citename{O'Brien et~al\mbox{.} }2002]{obrien2002}
+{\sc O'Brien, J.~F., Shen, C., and Gatchalian, C.~M.}
+\newblock 2002.
+\newblock Synthesizing sounds from rigid-body simulations.
+\newblock In {\em The ACM SIGGRAPH 2002 Symposium on Computer Animation}, ACM
+  Press, 175--181.
+
+\bibitem[\protect\citename{Serra and Smith }1990]{serra1990}
+{\sc Serra, X., and Smith, Julius, I.}
+\newblock 1990.
+\newblock Spectral modeling synthesis: A sound analysis/synthesis system based
+  on a deterministic plus stochastic decomposition.
+\newblock {\em Computer Music Journal 14}, 4, pp. 12--24.
+
+\bibitem[\protect\citename{Steven S.~An and Marschner }2012]{an2012}
+{\sc Steven S.~An, D. L.~J., and Marschner, S.}
+\newblock 2012.
+\newblock Motion-driven concatenative synthesis of cloth sounds.
+\newblock {\em ACM Transactions on Graphics (SIGGRAPH 2012)\/} (Aug.).
+
+\bibitem[\protect\citename{van~den Doel et~al\mbox{.} }2001]{vandenDoel2001}
+{\sc van~den Doel, K., Kry, P.~G., and Pai, D.~K.}
+\newblock 2001.
+\newblock Foleyautomatic: Physically-based sound effects for interactive
+  simulation and animation.
+\newblock 537--544.
+
+\bibitem[\protect\citename{Verron }2010]{verronphd}
+{\sc Verron, C.}
+\newblock 2010.
+\newblock {\em {Synth\`{e}se Immersive de Sons d'Environnement (Immersive
+  Synthesis of Environmental Sounds)}}.
+\newblock PhD thesis, Universit\'{e} de Provence.
+
+\bibitem[\protect\citename{Zheng and James }2009]{zheng2009}
+{\sc Zheng, C., and James, D.~L.}
+\newblock 2009.
+\newblock Harmonic fluids.
+\newblock {\em ACM Transactions on Graphics (SIGGRAPH 2009) 28}, 3 (Aug.).
+
+\bibitem[\protect\citename{Zheng and James }2010]{zheng2010}
+{\sc Zheng, C., and James, D.~L.}
+\newblock 2010.
+\newblock Rigid-body fracture sound with precomputed soundbanks.
+\newblock {\em ACM Transactions on Graphics (Proceedings of SIGGRAPH 2010) 29},
+  3 (July).
 
 \end{thebibliography}

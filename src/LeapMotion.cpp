@@ -72,7 +72,7 @@ void LeapListener::onFrame(const Controller& controller) {
             /* Only tracking the index finger */
             if (finger.type() == 1) 
             {
-                //cout << "index finger : pos, vel = " << finger.tipPosition() << ", " << finger.tipVelocity() << endl;
+
                 _lm->setIndexFingerState(finger.tipPosition(), finger.tipVelocity()); 
                 Eigen::MatrixXd *vel = new Eigen::MatrixXd(); 
                 vel->setZero(3,1); 
@@ -94,14 +94,6 @@ void LeapListener::onFrame(const Controller& controller) {
 
                 sndState::prevMouseSpeed = sndState::currMouseSpeed;
                 sndState::currMouseSpeed = speed*3.0; 
-
-
-
-
-
-
-                //cout << "speed = " << speed << endl; 
-
 
             }
 

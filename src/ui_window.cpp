@@ -112,11 +112,6 @@ void AudioGUI::stopStreamClicked()
     _eng->StopStream();
 }
 
-//void AudioGUI::updateMaxspeed()
-//{
-//    //cout << "Max speed = " << getMaxspeed() << endl;
-//}
-
 void AudioGUI::toggleFrequencyShift()
 {
     _eng->toggleFrequencyShift(); 
@@ -205,15 +200,6 @@ void VisualGUI::draw()
                    (float)0.25*sndState::handData.palmNor[2]);
         glEnd(); 
 
-        //cout << " drawing " << endl;
-        //Eigen::MatrixXd * tmp = new Eigen::MatrixXd(); 
-        //tmp->setZero(3,1); 
-        //_agui->_leapmotion->getIndexFingerPos(tmp); 
-
-        //glBegin(GL_POINTS);
-        //glColor3f(1.0f,1.0f,1.0f); 
-        //glVertex3f((float)(*tmp)(0),(float)(*tmp)(1),(float)(*tmp)(2)); 
-        //glEnd(); 
     }
     else 
     {
@@ -397,7 +383,6 @@ void Engine::computeMouseSpeed()
 
 void VisualGUI::mousePressEvent(QMouseEvent* e)
 {
-#if 0
     cout << "mouse pressed! " << endl;
 
     cout << hasMouseTracking() << endl;
@@ -439,37 +424,5 @@ void VisualGUI::mousePressEvent(QMouseEvent* e)
     }
     else
         QGLViewer::mousePressEvent(e);
-#endif
 }
 
-#if 0
-void AudioGUI::setQA(QApplication * qa) 
-{
-    _application = qa; 
-}
-
-void AudioGUI::setUI()
-{
-
-    startStreamButton = new streamControlPushButton("&Start audio stream.");
-
-    //QObject::connect(startStreamButton, SIGNAL(clicked()), qApp, SLOT(QOpenStream()));
-
-    //QVBoxLayout *layout = new QVBoxLayout(); 
-    //layout->addWidget(startStreamButton); 
-
-    window.resize(320, 240); 
-    window.setWindowTitle("Hello QT!");
-    window.show();
-    //window.setLayout(layout);
-
-}
-
-
-
-//void streamControlPushButton::QOpenStream()
-//{
-//    _audio_engine->OpenStream(); 
-//}
-
-#endif

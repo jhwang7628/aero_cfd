@@ -67,13 +67,34 @@ void ObjectLoader::loadSquare(Engine & eng)
     }
 }
 
-
-void ObjectLoader::loadSword(Engine & eng)
+void ObjectLoader::loadSwordAniso(Engine & eng)
 {
     for (int ii=0; ii<=36; ii++)
     {
         string num = to_string(ii*ObjectLoader::sampleInterval); 
         string filename = string("./sound/sword_aniso/g_2Dsword_aniso_ascii_y") + num + ".dat"; 
+
+        Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
+        //SoundReader::wavreader("./sound/test.wav", 20000, sound); 
+        IO::readMatrixXd(*sound, filename.c_str(), BINARY); 
+        SourceFunction * sf = new SourceFunction(10, sword_aniso, sound, ii);
+        eng.addSF(sf); 
+    }
+}
+
+void ObjectLoader::loadSword(Engine & eng)
+{
+    for (int ii=1; ii<=9; ii++)
+    {
+        /* skip bad textures */
+        if (ii*ObjectLoader::sampleInterval == 20 ||
+            ii*ObjectLoader::sampleInterval == 10    ) 
+            continue; 
+
+        string num = to_string(ii*ObjectLoader::sampleInterval);
+
+
+        string filename = string("./sound/sword_iso/g_2Dsword_iso_y") + num + ".dat"; 
 
         Eigen::MatrixXd * sound  = new Eigen::MatrixXd(); 
         //SoundReader::wavreader("./sound/test.wav", 20000, sound); 

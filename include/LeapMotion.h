@@ -9,6 +9,10 @@
 using namespace std; 
 using namespace Leap; 
 
+/* 
+ * struture for storing leap motion data.
+ * tip is the index finger tip
+ */
 struct HandData
 {
     Eigen::Vector3d tipPos; 
@@ -17,16 +21,6 @@ struct HandData
     Eigen::Vector3d palmNor; 
 
     Eigen::Matrix3d R_w2o; // rotation matrix from world to object space
-
-
-    //HandData()
-    //{
-    //    tipPos.setZero(); 
-    //    tipVel.setZero(); 
-    //    handDir.setZero(); 
-    //    palmNor.setZero(); 
-    //    R_w2o.setZero(); 
-    //}
 }; 
 
 
