@@ -4,6 +4,8 @@
 #include "parameters.h"
 #include "ObjectLoader.h"
 #include "FrameExporter.h"
+        #include <cstdlib>
+        #include <ctime>
 
 using namespace std; 
 
@@ -18,6 +20,8 @@ MyPortaudioClass::MyPortaudioClass(vector<const SourceFunction*> allSF) : _allSF
 
 {
     _data = new stereo(); 
+        /* Generate a new random seed from system time - do this once in your constructor */
+        srand(time(0));
 
     fp = fopen("out/log_anisosword.txt", "w");
 
@@ -42,145 +46,175 @@ int MyPortaudioClass::myMemberCallback(const void *input, void *output,
     (void) input; 
 
 
-    if ( PARAMETERS::SAVE_MOCAP_TO_DRIVE )
-    {
-        double time = timeInfo->outputBufferDacTime; 
-        printf("Exporting frame at time = %u\n", FrameExporter::frame);
-        FrameExporter::writeMotionCaptureData(sndState::handData, time); 
-        FrameExporter::frame ++;
-        return paContinue;
-    }
+    //if ( PARAMETERS::SAVE_MOCAP_TO_DRIVE )
+    //{
+    //    double time = timeInfo->outputBufferDacTime; 
+    //    printf("Exporting frame at time = %u\n", FrameExporter::frame);
+    //    FrameExporter::writeMotionCaptureData(sndState::handData, time); 
+    //    FrameExporter::frame ++;
+    //    return paContinue;
+    //}
 
-    /* data was read from hard drive. */
-    if ( PARAMETERS::READ_MOCAP_FROM_DRIVE ) 
-    {
-        handData = (_eng->allHandDataFromDrive)[FrameExporter::frame]; 
-        handData.tipVel = handData.tipVel / 1000.0*3.0; 
-        handData.tipPos = handData.tipPos / 1000.0*3.0; 
+    ///* data was read from hard drive. */
+    //if ( PARAMETERS::READ_MOCAP_FROM_DRIVE ) 
+    //{
+    //    handData = (_eng->allHandDataFromDrive)[FrameExporter::frame]; 
+    //    handData.tipVel = handData.tipVel / 1000.0*3.0; 
+    //    handData.tipPos = handData.tipPos / 1000.0*3.0; 
 
-        FrameExporter::frame ++; 
-        if (FrameExporter::frame >= _eng->allHandDataFromDrive.size() )
-        {
-            FrameExporter::frame = FrameExporter::frame % (_eng->allHandDataFromDrive.size());
-            return paComplete; 
-        }
+    //    FrameExporter::frame ++; 
+    //    if (FrameExporter::frame >= _eng->allHandDataFromDrive.size() )
+    //    {
+    //        FrameExporter::frame = FrameExporter::frame % (_eng->allHandDataFromDrive.size());
+    //        return paComplete; 
+    //    }
 
-        sndState::prevMouseSpeed = sndState::currMouseSpeed;
-        sndState::currMouseSpeed = handData.tipVel.norm(); 
-        sndState::handData = handData; 
-    }
-    else 
-    {
-        /* Copy the hand data */
-        if (sndState::handData.tipVel.norm() == handData.tipVel.norm())
-            curRepeatNumBuffer ++; 
-        else 
-            curRepeatNumBuffer = 0; 
+    //    sndState::prevMouseSpeed = sndState::currMouseSpeed;
+    //    sndState::currMouseSpeed = handData.tipVel.norm(); 
+    //    sndState::handData = handData; 
+    //}
+    //else 
+    //{
+    //    /* Copy the hand data */
+    //    if (sndState::handData.tipVel.norm() == handData.tipVel.norm())
+    //        curRepeatNumBuffer ++; 
+    //    else 
+    //        curRepeatNumBuffer = 0; 
 
-        if (curRepeatNumBuffer > PARAMETERS::maxRepeatNumBuffer)
-        {
-            for (int ii=0; ii<frameCount; ii++) 
-            {
-                *out++ = 0.0f; 
-                *out++ = 0.0f;  
+    //    if (curRepeatNumBuffer > PARAMETERS::maxRepeatNumBuffer)
+    //    {
+    //        for (int ii=0; ii<frameCount; ii++) 
+    //        {
+    //            *out++ = 0.0f; 
+    //            *out++ = 0.0f;  
 
-            }
-            return paContinue; 
-        }
+    //        }
+    //        return paContinue; 
+    //    }
 
-        handData = sndState::handData; 
-    }
-
-
-
-    Eigen::Vector3d wind_ref = handData.R_w2o * (-handData.tipVel);
-    wind_ref.normalize();
-    wind_ref[1] = 0.0; // project it to 2D plane.
-
-    // compute nearest sound state
-    double theta;
-    if (wind_ref.norm() > 1E-14)
-        theta = acos(wind_ref[0] / wind_ref.norm()); // 
-    else // probably haven't got any mocap data
-        theta = 0.0; 
-
-    int wrapAngle = _allSF.size() * ObjectLoader::sampleInterval;
-    int textureIndex =  ( (int)floor(theta*180.0/3.14159) % wrapAngle ) / ObjectLoader::sampleInterval;
+    //    handData = sndState::handData; 
+    //}
 
 
-    /* make sure the mouse speed is frozen between every callback. */
-    _prevScale = _currScale;
-    _currScale = sndState::currMouseSpeed/_eng->getSensitivity();
-    double alpha, alpha2; 
-    double scale; //blended scales
-    double sharpness = _eng->getSharpness(); 
 
-    unsigned int ii; 
+    //Eigen::Vector3d wind_ref = handData.R_w2o * (-handData.tipVel);
+    //wind_ref.normalize();
+    //wind_ref[1] = 0.0; // project it to 2D plane.
 
-    /* Intertextual blending by sacrificing part of the new sound*/
-    int subBuffer = frameCount / 10; 
-    _data->gx = (*_thisSF)->getgx(_timeStamp); 
-    _data->gy = (*_thisSF)->getgy(_timeStamp); 
-    _data->gz = (*_thisSF)->getgz(_timeStamp); 
-    double lastSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
+    //// compute nearest sound state
+    //double theta;
+    //if (wind_ref.norm() > 1E-14)
+    //    theta = acos(wind_ref[0] / wind_ref.norm()); // 
+    //else // probably haven't got any mocap data
+    //    theta = 0.0; 
 
-    int incre = round((double)PARAMETERS::UPSAMPLE_RATIO*1.0); 
+    //int wrapAngle = _allSF.size() * ObjectLoader::sampleInterval;
+    //int textureIndex =  ( (int)floor(theta*180.0/3.14159) % wrapAngle ) / ObjectLoader::sampleInterval;
 
-    if (_frequencyShift)
-        _timeStamp += incre*subBuffer;
-    else 
-        _timeStamp += PARAMETERS::UPSAMPLE_RATIO*subBuffer;
 
-    _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+    ///* make sure the mouse speed is frozen between every callback. */
+    //_prevScale = _currScale;
+    //_currScale = sndState::currMouseSpeed/_eng->getSensitivity();
+    //double alpha, alpha2; 
+    //double scale; //blended scales
+    //double sharpness = _eng->getSharpness(); 
 
-    _thisSF = _allSF.begin() + textureIndex;
+    //unsigned int ii; 
 
-    _data->gx = (*_thisSF)->getgx(_timeStamp); 
-    _data->gy = (*_thisSF)->getgy(_timeStamp); 
-    _data->gz = (*_thisSF)->getgz(_timeStamp); 
-    double currSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
+    ///* Intertextual blending by sacrificing part of the new sound*/
+    //int subBuffer = frameCount / 10; 
+    //_data->gx = (*_thisSF)->getgx(_timeStamp); 
+    //_data->gy = (*_thisSF)->getgy(_timeStamp); 
+    //_data->gz = (*_thisSF)->getgz(_timeStamp); 
+    //double lastSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
 
-    for (ii=0; ii<subBuffer; ii++) 
-    {
-        alpha2 = (double)(ii)/(double)(subBuffer); 
-        
-        _data->left_phase = (1.0 - alpha2) * lastSound + alpha2 * currSound; 
-        _data->right_phase = _data->left_phase; 
+    //int incre = round((double)PARAMETERS::UPSAMPLE_RATIO*1.0); 
 
-        fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
+    //if (_frequencyShift)
+    //    _timeStamp += incre*subBuffer;
+    //else 
+    //    _timeStamp += PARAMETERS::UPSAMPLE_RATIO*subBuffer;
 
-        *out++ = (float) _data->left_phase; 
-        *out++ = (float) _data->right_phase; 
-    }
+    //_timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+
+    //_thisSF = _allSF.begin() + textureIndex;
+
+    //_data->gx = (*_thisSF)->getgx(_timeStamp); 
+    //_data->gy = (*_thisSF)->getgy(_timeStamp); 
+    //_data->gz = (*_thisSF)->getgz(_timeStamp); 
+    //double currSound = (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(_prevScale,sharpness);
+
+    //for (ii=0; ii<subBuffer; ii++) 
+    //{
+    //    alpha2 = (double)(ii)/(double)(subBuffer); 
+    //    
+    //    _data->left_phase = (1.0 - alpha2) * lastSound + alpha2 * currSound; 
+    //    _data->right_phase = _data->left_phase; 
+
+    //    fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
+
+    //    *out++ = (float) _data->left_phase; 
+    //    *out++ = (float) _data->right_phase; 
+    //}
 
     /* Amplitude/freqeuncy scaling */
-    for (ii=subBuffer; ii<frameCount; ii++) 
+    //for (ii=subBuffer; ii<frameCount; ii++) 
+    for (int ii=0; ii<frameCount; ii++) 
     {
-        alpha = (double)(ii)/(double)(frameCount - subBuffer); 
-        scale = (1.0 - alpha)*_prevScale + alpha*_currScale; 
+        //alpha = (double)(ii)/(double)(frameCount - subBuffer); 
+        //scale = (1.0 - alpha)*_prevScale + alpha*_currScale; 
 
-        _data->gx = (*_thisSF)->getgx(_timeStamp); 
-        _data->gy = (*_thisSF)->getgy(_timeStamp); 
-        _data->gz = (*_thisSF)->getgz(_timeStamp); 
+        //_data->gx = (*_thisSF)->getgx(_timeStamp); 
+        //_data->gy = (*_thisSF)->getgy(_timeStamp); 
+        //_data->gz = (*_thisSF)->getgz(_timeStamp); 
 
-        _data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(scale,sharpness); 
-        _data->right_phase = _data->left_phase; 
+        //_data->left_phase =  (_data->gx + _data->gy + _data->gz)/_globalAbsMax*pow(scale,sharpness); 
+        //_data->right_phase = _data->left_phase; 
 
-        /* time step the signal */
-        int incre = round((double)PARAMETERS::UPSAMPLE_RATIO*scale); 
+        ///* time step the signal */
+        //int incre = round((double)PARAMETERS::UPSAMPLE_RATIO*scale); 
 
-        if (_frequencyShift)
-            _timeStamp += incre;
-        else 
-            _timeStamp += PARAMETERS::UPSAMPLE_RATIO;
+        //if (_frequencyShift)
+        //    _timeStamp += incre;
+        //else 
+        //    _timeStamp += PARAMETERS::UPSAMPLE_RATIO;
 
 
-        _timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
+        //_timeStamp = _timeStamp % (*_thisSF)->maxTimeStep; 
 
-        //fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
+        ////fprintf(fp, "%.12f %.12f %u\n", sndState::currMouseSpeed, _data->left_phase, textureIndex); 
 
-        *out++ = (float) _data->left_phase; 
-        *out++ = (float) _data->right_phase; 
+        //*out++ = (float) _data->left_phase; 
+        //*out++ = (float) _data->right_phase; 
+
+
+        //////////////////////////////////////////////////////////////////////
+        ///// NOISE GENERATE
+        /* Include requisits */
+        
+        
+        /* Setup constants */
+        const static int q = 15;
+        const static float c1 = (1 << q) - 1;
+        const static float c2 = ((int)(c1 / 3)) + 1;
+        const static float c3 = 1.f / c1;
+        
+        /* random number in range 0 - 1 not including 1 */
+        float random = 0.f;
+        
+        /* the white noise */
+        float noise = 0.f;
+        
+        random = ((float)rand() / (float)(RAND_MAX + 1));
+        noise = (2.f * ((random * c2) + (random * c2) + (random * c2)) - 3.f * (c2 - 1.f)) * c3;
+
+        // TODO naively do FFT for the entire sequence, filter, and IFFT to see how it sound
+        *out++ = noise;
+        *out++ = noise; 
+        //////////////////////////////////////////////////////////////////////
+
+
+
 
     }
 
@@ -243,11 +277,22 @@ void Engine::OpenStream()
     _outputParameters.suggestedLatency = Pa_GetDeviceInfo(_outputParameters.device)->defaultLowOutputLatency; 
     _outputParameters.hostApiSpecificStreamInfo = NULL; 
 
+    //_err = Pa_OpenStream(
+    //           &_stream,
+    //           NULL, /* no input */
+    //           &_outputParameters,
+    //           10000, /* SAMPLE_RATE, */ 
+    //           //paFramesPerBufferUnspecified, /* FRAMES_PER_BUFFER, */
+    //           100, /* FRAMES_PER_BUFFER, */
+    //           paClipOff,      /* we won't output out of range samples so don't bother clipping them */
+    //           &(MyPortaudioClass::myPaCallback),
+    //           (void*) _mypa);
+
     _err = Pa_OpenStream(
                &_stream,
                NULL, /* no input */
                &_outputParameters,
-               10000, /* SAMPLE_RATE, */ 
+               44100, /* SAMPLE_RATE, */ 
                //paFramesPerBufferUnspecified, /* FRAMES_PER_BUFFER, */
                100, /* FRAMES_PER_BUFFER, */
                paClipOff,      /* we won't output out of range samples so don't bother clipping them */
