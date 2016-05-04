@@ -1,8 +1,7 @@
 *.o 
 *.swp
-dobashi
-dobashi.app
+aerosound_mocap
+aerosound_mocap.app
 .qglviewer.xml
 out
-movie
 
